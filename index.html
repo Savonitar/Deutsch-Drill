@@ -95,6 +95,33 @@
             </dl>
           </section>
 
+          <section class="stat-block verb-list-block hidden" id="verbListBlock">
+            <div class="section-title-row">
+              <h3>Training list</h3>
+              <span id="verbListCount">0 selected</span>
+            </div>
+            <label class="toggle-line">
+              <input type="checkbox" id="verbListToggle">
+              <span>Train selected</span>
+            </label>
+            <div class="search-field">
+              <label for="verbSearchInput">Search</label>
+              <input
+                id="verbSearchInput"
+                type="search"
+                autocomplete="off"
+                placeholder="verb, prep, case"
+              >
+            </div>
+            <div class="selected-verb-list" id="selectedVerbList"></div>
+            <div class="verb-list-actions">
+              <button class="ghost-button compact-button" type="button" id="verbListClear">
+                Clear
+              </button>
+            </div>
+            <ol class="verb-search-results" id="verbSearchResults"></ol>
+          </section>
+
           <section class="stat-block">
             <h3>Recent misses</h3>
             <ol class="miss-list" id="missList"></ol>

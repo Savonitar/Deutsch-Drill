@@ -19,7 +19,16 @@ Progress is stored locally in the browser with `localStorage`.
 - Verb missing-preposition questions
 - Verb preposition-case questions
 - Full verb-pattern recognition, such as `warten auf + Akkusativ`
+- Custom verb training lists with search and selected-only practice
 - Mistake-history review for repeated practice
+
+## Checks
+
+Run the no-dependency app checks with:
+
+```bash
+npm test
+```
 
 ## GitHub Pages
 

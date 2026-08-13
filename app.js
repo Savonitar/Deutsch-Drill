@@ -1,6 +1,7 @@
 "use strict";
 
 const STORE_KEY = "deutsch-drill-progress-v1";
+const TRAINING_LIST_KEY = "deutsch-drill-training-list-v1";
 
 const CASES = {
   nom: "Nominativ",
@@ -1342,6 +1343,8 @@ const VERB_ITEMS = [
 const PREPOSITIONS = Array.from(new Set(VERB_ITEMS.map((item) => item.prep))).sort((a, b) =>
   a.localeCompare(b, "de-DE")
 );
+const VERB_LOOKUP = new Map(VERB_ITEMS.map((item) => [item.id, item]));
+const VERB_IDS = new Set(VERB_LOOKUP.keys());
 
 const elements = {
   streak: document.querySelector("#streakValue"),
@@ -1364,7 +1367,14 @@ const elements = {
   topicCorrect: document.querySelector("#topicCorrect"),
   topicMissed: document.querySelector("#topicMissed"),
   bestStreak: document.querySelector("#bestStreak"),
-  missList: document.querySelector("#missList")
+  missList: document.querySelector("#missList"),
+  verbListBlock: document.querySelector("#verbListBlock"),
+  verbListCount: document.querySelector("#verbListCount"),
+  verbListToggle: document.querySelector("#verbListToggle"),
+  verbSearchInput: document.querySelector("#verbSearchInput"),
+  selectedVerbList: document.querySelector("#selectedVerbList"),
+  verbListClear: document.querySelector("#verbListClear"),
+  verbSearchResults: document.querySelector("#verbSearchResults")
 };
 
 const appState = {
@@ -1372,11 +1382,13 @@ const appState = {
   adjMode: "form",
   adjFilter: "all",
   verbMode: "prep",
+  verbSearch: "",
   reviewOnly: false,
   current: null,
   selected: "",
   answered: false,
-  progress: loadProgress()
+  progress: loadProgress(),
+  trainingList: loadTrainingList()
 };
 
 function loadProgress() {
@@ -1409,6 +1421,148 @@ function loadProgress() {
 
 function saveProgress() {
   localStorage.setItem(STORE_KEY, JSON.stringify(appState.progress));
+}
+
+function loadTrainingList() {
+  try {
+    const saved = JSON.parse(localStorage.getItem(TRAINING_LIST_KEY));
+    if (saved && typeof saved === "object") {
+      return {
+        verbs: sanitizeVerbIds(saved.verbs),
+        useVerbList: Boolean(saved.useVerbList)
+      };
+    }
+  } catch (error) {
+    localStorage.removeItem(TRAINING_LIST_KEY);
+  }
+  return {
+    verbs: [],
+    useVerbList: false
+  };
+}
+
+function saveTrainingList() {
+  appState.trainingList.verbs = selectedVerbIds();
+  appState.trainingList.useVerbList =
+    Boolean(appState.trainingList.useVerbList) && appState.trainingList.verbs.length > 0;
+  localStorage.setItem(TRAINING_LIST_KEY, JSON.stringify(appState.trainingList));
+}
+
+function sanitizeVerbIds(ids) {
+  if (!Array.isArray(ids)) {
+    return [];
+  }
+  const seen = new Set();
+  return ids.filter((id) => {
+    const keep = VERB_IDS.has(id) && !seen.has(id);
+    seen.add(id);
+    return keep;
+  });
+}
+
+function selectedVerbIds() {
+  const ids = sanitizeVerbIds(appState.trainingList.verbs);
+  if (ids.length !== appState.trainingList.verbs.length) {
+    appState.trainingList.verbs = ids;
+  }
+  return ids;
+}
+
+function selectedVerbItems() {
+  return selectedVerbIds()
+    .map((id) => VERB_LOOKUP.get(id))
+    .filter(Boolean);
+}
+
+function isVerbListActive() {
+  return appState.trainingList.useVerbList && selectedVerbIds().length > 0;
+}
+
+function activeVerbItems() {
+  const items = selectedVerbItems();
+  return isVerbListActive() && items.length ? items : VERB_ITEMS;
+}
+
+function verbPatternLabel(item) {
+  return `${item.prep} + ${CASE_SHORT[item.caseKey]}`;
+}
+
+function normalizeSearch(value) {
+  return String(value)
+    .toLocaleLowerCase("de-DE")
+    .normalize("NFD")
+    .replace(/[\u0300-\u036f]/g, "");
+}
+
+function verbSearchText(item) {
+  return normalizeSearch(
+    [
+      item.id,
+      item.verb,
+      item.prep,
+      CASES[item.caseKey],
+      CASE_SHORT[item.caseKey],
+      item.pattern,
+      item.meaning,
+      item.sentence
+    ].join(" ")
+  );
+}
+
+function matchingVerbItems() {
+  const terms = normalizeSearch(appState.verbSearch).trim().split(/\s+/).filter(Boolean);
+  const selected = new Set(selectedVerbIds());
+  return VERB_ITEMS.filter((item) => {
+    const text = verbSearchText(item);
+    return terms.every((term) => text.includes(term));
+  })
+    .sort((a, b) => {
+      const selectedSort = Number(selected.has(b.id)) - Number(selected.has(a.id));
+      return selectedSort || a.verb.localeCompare(b.verb, "de-DE");
+    })
+    .slice(0, terms.length ? 12 : 8);
+}
+
+function toggleVerbInTrainingList(id) {
+  if (!VERB_IDS.has(id)) {
+    return;
+  }
+  const wasActive = isVerbListActive();
+  const ids = selectedVerbIds();
+  const index = ids.indexOf(id);
+  if (index >= 0) {
+    ids.splice(index, 1);
+  } else {
+    ids.push(id);
+  }
+  appState.trainingList.verbs = ids;
+  if (!ids.length) {
+    appState.trainingList.useVerbList = false;
+  }
+  saveTrainingList();
+  refreshAfterTrainingListChange(wasActive || isVerbListActive());
+}
+
+function setVerbListEnabled(enabled) {
+  appState.trainingList.useVerbList = enabled && selectedVerbIds().length > 0;
+  saveTrainingList();
+  refreshAfterTrainingListChange(true);
+}
+
+function clearVerbTrainingList() {
+  const wasActive = isVerbListActive();
+  appState.trainingList.verbs = [];
+  appState.trainingList.useVerbList = false;
+  saveTrainingList();
+  refreshAfterTrainingListChange(wasActive);
+}
+
+function refreshAfterTrainingListChange(advance) {
+  if (advance && appState.topic === "verbs" && !appState.reviewOnly) {
+    nextExercise();
+  } else {
+    render();
+  }
 }
 
 function getTopicStats(topic) {
@@ -1672,7 +1826,7 @@ function buildAdjectiveExercise() {
 }
 
 function buildVerbExercise() {
-  const item = weightedPick(VERB_ITEMS);
+  const item = weightedPick(activeVerbItems());
   const mode = appState.verbMode;
 
   if (mode === "case") {
@@ -1786,6 +1940,7 @@ function render() {
   renderTopicChrome();
   renderControls();
   renderQuestion();
+  renderVerbTrainingList();
   renderTopicStats();
 }
 
@@ -1808,9 +1963,12 @@ function renderTopicChrome() {
     elements.topicTitle.textContent = "Adjective ending";
     elements.dataBadge.textContent = `${NOUNS.length + STRONG_SINGULAR_NOUNS.length} nouns, ${ADJECTIVES.length} adjectives`;
   } else {
+    const selectedCount = selectedVerbIds().length;
     elements.topicKicker.textContent = "Preposition plus case";
     elements.topicTitle.textContent = "Verb pattern";
-    elements.dataBadge.textContent = `${VERB_ITEMS.length} authored patterns`;
+    elements.dataBadge.textContent = isVerbListActive()
+      ? `${selectedCount} selected of ${VERB_ITEMS.length} patterns`
+      : `${VERB_ITEMS.length} authored patterns`;
   }
 }
 
@@ -1957,6 +2115,79 @@ function renderTopicStats() {
   });
 }
 
+function renderVerbTrainingList() {
+  const isVerbTopic = appState.topic === "verbs";
+  elements.verbListBlock.classList.toggle("hidden", !isVerbTopic);
+  if (!isVerbTopic) {
+    return;
+  }
+
+  const selectedIds = selectedVerbIds();
+  const selectedSet = new Set(selectedIds);
+  const selectedItems = selectedVerbItems();
+  elements.verbListCount.textContent = `${selectedIds.length} selected`;
+  elements.verbListToggle.checked = isVerbListActive();
+  elements.verbListToggle.disabled = !selectedIds.length;
+  elements.verbListClear.disabled = !selectedIds.length;
+
+  if (document.activeElement !== elements.verbSearchInput) {
+    elements.verbSearchInput.value = appState.verbSearch;
+  }
+
+  elements.selectedVerbList.replaceChildren();
+  if (!selectedItems.length) {
+    const empty = document.createElement("div");
+    empty.className = "selected-verb-empty";
+    empty.textContent = "No words selected.";
+    elements.selectedVerbList.append(empty);
+  } else {
+    selectedItems.forEach((item) => {
+      const button = document.createElement("button");
+      button.type = "button";
+      button.className = "selected-verb-chip";
+      button.title = "Remove";
+      const name = document.createElement("strong");
+      name.textContent = item.verb;
+      const pattern = document.createElement("span");
+      pattern.textContent = verbPatternLabel(item);
+      const mark = document.createElement("span");
+      mark.className = "remove-mark";
+      mark.textContent = "x";
+      button.append(name, pattern, mark);
+      button.addEventListener("click", () => toggleVerbInTrainingList(item.id));
+      elements.selectedVerbList.append(button);
+    });
+  }
+
+  elements.verbSearchResults.replaceChildren();
+  const results = matchingVerbItems();
+  if (!results.length) {
+    const item = document.createElement("li");
+    item.className = "verb-result-empty";
+    item.textContent = "No matches.";
+    elements.verbSearchResults.append(item);
+    return;
+  }
+
+  results.forEach((verbItem) => {
+    const item = document.createElement("li");
+    const button = document.createElement("button");
+    const selected = selectedSet.has(verbItem.id);
+    button.type = "button";
+    button.className = "verb-result-button";
+    button.classList.toggle("selected", selected);
+    button.setAttribute("aria-pressed", String(selected));
+    const name = document.createElement("strong");
+    name.textContent = verbItem.verb;
+    const detail = document.createElement("span");
+    detail.textContent = `${verbPatternLabel(verbItem)} · ${verbItem.meaning}`;
+    button.append(name, detail);
+    button.addEventListener("click", () => toggleVerbInTrainingList(verbItem.id));
+    item.append(button);
+    elements.verbSearchResults.append(item);
+  });
+}
+
 function submitAnswer() {
   if (!appState.selected || appState.answered) {
     elements.feedbackBox.textContent = "Choose an answer first.";
@@ -2028,5 +2259,13 @@ elements.topicButtons.forEach((button) => {
 elements.submitButton.addEventListener("click", submitAnswer);
 elements.nextButton.addEventListener("click", nextExercise);
 elements.resetButton.addEventListener("click", resetProgress);
+elements.verbSearchInput.addEventListener("input", (event) => {
+  appState.verbSearch = event.target.value;
+  renderVerbTrainingList();
+});
+elements.verbListToggle.addEventListener("change", (event) => {
+  setVerbListEnabled(event.target.checked);
+});
+elements.verbListClear.addEventListener("click", clearVerbTrainingList);
 
 nextExercise();
