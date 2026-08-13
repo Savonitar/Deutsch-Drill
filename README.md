@@ -1,4 +1,12 @@
+<p align="center">
+  <a href="https://savonitar.github.io/Deutsch-Drill/">
+    <img src="assets/deutsch-drill-logo.png" alt="Deutsch Drill logo: a detailed badge with der, die, das tags and a drill bit" width="136">
+  </a>
+</p>
+
 # Deutsch Drill
+
+**Live app:** [savonitar.github.io/Deutsch-Drill](https://savonitar.github.io/Deutsch-Drill/)
 
 A static German training page for:
 
@@ -34,6 +42,10 @@ npm test
 ```
 
 ## GitHub Pages
+
+The public app is available at:
+
+<https://savonitar.github.io/Deutsch-Drill/>
 
 The repository includes a GitHub Actions workflow that deploys the static site
 to Pages whenever `main` is updated. In the repository settings, set Pages to
