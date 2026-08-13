@@ -1373,6 +1373,8 @@ const elements = {
   verbListToggle: document.querySelector("#verbListToggle"),
   verbSearchInput: document.querySelector("#verbSearchInput"),
   selectedVerbList: document.querySelector("#selectedVerbList"),
+  verbBulkAdd: document.querySelector("#verbBulkAdd"),
+  verbBulkStatus: document.querySelector("#verbBulkStatus"),
   verbListClear: document.querySelector("#verbListClear"),
   verbSearchResults: document.querySelector("#verbSearchResults")
 };
@@ -1383,6 +1385,7 @@ const appState = {
   adjFilter: "all",
   verbMode: "prep",
   verbSearch: "",
+  verbBulkStatus: "",
   reviewOnly: false,
   current: null,
   selected: "",
@@ -1494,6 +1497,17 @@ function normalizeSearch(value) {
     .replace(/[\u0300-\u036f]/g, "");
 }
 
+function normalizeVerbName(value) {
+  return normalizeSearch(value)
+    .replace(/[^a-z0-9\s]+/g, " ")
+    .replace(/\s+/g, " ")
+    .trim();
+}
+
+function bareVerbName(value) {
+  return normalizeVerbName(value).replace(/^sich\s+/, "");
+}
+
 function verbSearchText(item) {
   return normalizeSearch(
     [
@@ -1509,7 +1523,72 @@ function verbSearchText(item) {
   );
 }
 
+function verbNameMatchesTerm(item, term) {
+  const normalizedTerm = normalizeVerbName(term);
+  const bareTerm = bareVerbName(term);
+  const normalizedVerb = normalizeVerbName(item.verb);
+  const bareVerb = bareVerbName(item.verb);
+  return (
+    normalizedTerm === normalizedVerb ||
+    normalizedTerm === bareVerb ||
+    bareTerm === normalizedVerb ||
+    bareTerm === bareVerb
+  );
+}
+
+function bulkVerbTerms(value = appState.verbSearch) {
+  const seen = new Set();
+  return String(value)
+    .split(/[,;\n\r/|]+/)
+    .map((term) => term.trim())
+    .filter(Boolean)
+    .filter((term) => {
+      const normalized = normalizeVerbName(term);
+      const keep = normalized && !seen.has(normalized);
+      seen.add(normalized);
+      return keep;
+    });
+}
+
+function bulkVerbSummary(value = appState.verbSearch) {
+  const terms = bulkVerbTerms(value);
+  const seenIds = new Set();
+  const items = [];
+  const missing = [];
+
+  terms.forEach((term) => {
+    const matches = VERB_ITEMS.filter((item) => verbNameMatchesTerm(item, term));
+    if (!matches.length) {
+      missing.push(term);
+      return;
+    }
+    matches.forEach((item) => {
+      if (!seenIds.has(item.id)) {
+        seenIds.add(item.id);
+        items.push(item);
+      }
+    });
+  });
+
+  return {
+    terms,
+    items,
+    missing
+  };
+}
+
 function matchingVerbItems() {
+  const bulk = bulkVerbSummary(appState.verbSearch);
+  if (bulk.terms.length > 1) {
+    const selected = new Set(selectedVerbIds());
+    return bulk.items
+      .sort((a, b) => {
+        const selectedSort = Number(selected.has(b.id)) - Number(selected.has(a.id));
+        return selectedSort || a.verb.localeCompare(b.verb, "de-DE");
+      })
+      .slice(0, 32);
+  }
+
   const terms = normalizeSearch(appState.verbSearch).trim().split(/\s+/).filter(Boolean);
   const selected = new Set(selectedVerbIds());
   return VERB_ITEMS.filter((item) => {
@@ -1521,6 +1600,43 @@ function matchingVerbItems() {
       return selectedSort || a.verb.localeCompare(b.verb, "de-DE");
     })
     .slice(0, terms.length ? 12 : 8);
+}
+
+function addBulkVerbMatches() {
+  const summary = bulkVerbSummary();
+  if (!summary.items.length) {
+    appState.verbBulkStatus = summary.terms.length
+      ? `No examples found for ${summary.terms.join(", ")}.`
+      : "";
+    renderVerbTrainingList();
+    return;
+  }
+
+  const ids = selectedVerbIds();
+  const selected = new Set(ids);
+  let added = 0;
+  summary.items.forEach((item) => {
+    if (!selected.has(item.id)) {
+      selected.add(item.id);
+      ids.push(item.id);
+      added += 1;
+    }
+  });
+
+  appState.trainingList.verbs = ids;
+  appState.trainingList.useVerbList = true;
+  appState.verbBulkStatus = bulkStatusText(summary, added);
+  saveTrainingList();
+  refreshAfterTrainingListChange(true);
+}
+
+function bulkStatusText(summary, added) {
+  const countLabel = `${summary.items.length} example${summary.items.length === 1 ? "" : "s"} found`;
+  const addLabel = added ? `${added} added` : "already selected";
+  if (summary.missing.length) {
+    return `${countLabel}, ${addLabel}. Missing: ${summary.missing.join(", ")}.`;
+  }
+  return `${countLabel}, ${addLabel}.`;
 }
 
 function toggleVerbInTrainingList(id) {
@@ -2129,6 +2245,15 @@ function renderVerbTrainingList() {
   elements.verbListToggle.checked = isVerbListActive();
   elements.verbListToggle.disabled = !selectedIds.length;
   elements.verbListClear.disabled = !selectedIds.length;
+  const bulk = bulkVerbSummary();
+  const newBulkItems = bulk.items.filter((item) => !selectedSet.has(item.id)).length;
+  elements.verbBulkAdd.disabled = !bulk.items.length;
+  elements.verbBulkStatus.textContent =
+    appState.verbBulkStatus ||
+    (bulk.terms.length > 1 ? bulkStatusText(bulk, newBulkItems) : "");
+  elements.verbBulkStatus.className = `verb-bulk-status${
+    bulk.items.length && bulk.terms.length > 1 ? " good" : ""
+  }${!bulk.items.length && bulk.terms.length > 1 ? " bad" : ""}`;
 
   if (document.activeElement !== elements.verbSearchInput) {
     elements.verbSearchInput.value = appState.verbSearch;
@@ -2261,8 +2386,10 @@ elements.nextButton.addEventListener("click", nextExercise);
 elements.resetButton.addEventListener("click", resetProgress);
 elements.verbSearchInput.addEventListener("input", (event) => {
   appState.verbSearch = event.target.value;
+  appState.verbBulkStatus = "";
   renderVerbTrainingList();
 });
+elements.verbBulkAdd.addEventListener("click", addBulkVerbMatches);
 elements.verbListToggle.addEventListener("change", (event) => {
   setVerbListEnabled(event.target.checked);
 });

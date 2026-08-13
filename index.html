@@ -106,19 +106,23 @@
             </label>
             <div class="search-field">
               <label for="verbSearchInput">Search</label>
-              <input
+              <textarea
                 id="verbSearchInput"
-                type="search"
                 autocomplete="off"
                 placeholder="verb, prep, case"
-              >
+                rows="3"
+              ></textarea>
             </div>
             <div class="selected-verb-list" id="selectedVerbList"></div>
             <div class="verb-list-actions">
+              <button class="primary-button compact-button" type="button" id="verbBulkAdd">
+                Add found
+              </button>
               <button class="ghost-button compact-button" type="button" id="verbListClear">
                 Clear
               </button>
             </div>
+            <div class="verb-bulk-status" id="verbBulkStatus" aria-live="polite"></div>
             <ol class="verb-search-results" id="verbSearchResults"></ol>
           </section>
 

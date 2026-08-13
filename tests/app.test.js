@@ -190,6 +190,64 @@ vm.runInContext(`${app}
     "Search should match accented prepositions"
   );
 
+  appState.verbSearch = [
+    "achten",
+    "warten",
+    "vorbereiten",
+    "freuen",
+    "denken",
+    "glauben",
+    "interessieren",
+    "entscheiden",
+    "danken",
+    "sprechen",
+    "beschäftigen",
+    "teilnehmen",
+    "beschweren",
+    "träumen",
+    "abhängen",
+    "kümmern",
+    "verlieben"
+  ].join(", ");
+  const pastedSummary = bulkVerbSummary();
+  assert(!pastedSummary.missing.length, "User pasted list should fully match known examples");
+  assert(
+    pastedSummary.items.some((item) => item.id === "sich-vorbereiten-auf-akk"),
+    "Bulk paste should match reflexive verbs without typed sich"
+  );
+  assert(
+    pastedSummary.items.some((item) => item.id === "sich-freuen-auf-akk") &&
+      pastedSummary.items.some((item) => item.id === "sich-freuen-ueber-akk"),
+    "Bulk paste should include all known examples for a matching verb"
+  );
+  addBulkVerbMatches();
+  assert(isVerbListActive(), "Bulk add should enable selected-only training");
+  assert(
+    selectedVerbIds().includes("sich-kuemmern-um-akk") &&
+      selectedVerbIds().includes("sich-verlieben-in-akk"),
+    "Bulk add should save matching reflexive items"
+  );
+
+  clearVerbTrainingList();
+  appState.verbSearch = "sich kümmern / sich verlieben / sich freuen";
+  addBulkVerbMatches();
+  assert(
+    selectedVerbIds().includes("sich-kuemmern-um-akk") &&
+      selectedVerbIds().includes("sich-verlieben-in-akk") &&
+      selectedVerbIds().includes("sich-freuen-auf-akk"),
+    "Bulk add should accept terms typed with sich"
+  );
+
+  clearVerbTrainingList();
+  appState.verbSearch = "denken, missingverb";
+  addBulkVerbMatches();
+  assert(
+    selectedVerbIds().includes("denken-an-akk") &&
+      !selectedVerbIds().includes("nachdenken-ueber-akk"),
+    "Bulk add should exact-match verb names and report missing terms"
+  );
+  assert(appState.verbBulkStatus.includes("Missing: missingverb"), "Bulk add should report misses");
+
   appState.topic = "verbs";
   appState.verbMode = "prep";
   appState.trainingList.verbs = ["warten-auf-akk", "sich-kuemmern-um-akk"];
