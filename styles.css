@@ -131,7 +131,9 @@ h3 {
 .choice-button,
 .filter-button,
 .primary-button,
-.ghost-button {
+.ghost-button,
+.favorite-button,
+.favorite-remove-button {
   min-height: 42px;
   border: 1px solid var(--line);
   border-radius: 8px;
@@ -154,7 +156,9 @@ h3 {
 .tab-button:hover,
 .filter-button:hover,
 .choice-button:hover,
-.ghost-button:hover {
+.ghost-button:hover,
+.favorite-button:hover,
+.favorite-remove-button:hover {
   border-color: var(--teal);
 }
 
@@ -203,6 +207,12 @@ h3 {
   justify-content: space-between;
   gap: 16px;
   margin-bottom: 18px;
+}
+
+.trainer-tools {
+  display: flex;
+  align-items: center;
+  gap: 8px;
 }
 
 .pill {
@@ -263,16 +273,23 @@ h3 {
 }
 
 .prompt {
-  display: flex;
-  align-items: center;
+  display: block;
   min-height: 96px;
   font-size: 2rem;
   line-height: 1.28;
+  text-wrap: pretty;
 }
 
 .blank {
-  color: var(--teal-dark);
+  display: inline-block;
+  width: 1.65em;
+  height: 0.72em;
+  margin: 0 0.06em;
+  overflow: hidden;
+  border-bottom: 0.12em solid var(--teal-dark);
+  color: transparent;
   font-weight: 800;
+  vertical-align: baseline;
 }
 
 .answer-grid {
@@ -392,6 +409,25 @@ h3 {
   background: var(--surface);
 }
 
+.favorite-button {
+  display: grid;
+  place-items: center;
+  width: 42px;
+  min-width: 42px;
+  padding: 0;
+  background: var(--surface);
+  color: var(--muted);
+  font-size: 1.35rem;
+  font-weight: 900;
+  line-height: 1;
+}
+
+.favorite-button.active {
+  border-color: rgba(200, 121, 18, 0.46);
+  background: #fff6e8;
+  color: var(--amber);
+}
+
 .hidden {
   display: none;
 }
@@ -494,17 +530,20 @@ h3 {
 }
 
 .selected-verb-list,
-.verb-search-results {
+.verb-search-results,
+.favorite-list {
   display: grid;
   gap: 8px;
 }
 
-.selected-verb-list {
+.selected-verb-list,
+.favorite-list {
   grid-template-columns: 1fr;
 }
 
 .selected-verb-empty,
-.verb-result-empty {
+.verb-result-empty,
+.favorite-empty {
   color: var(--muted);
   font-size: 0.86rem;
   line-height: 1.35;
@@ -601,6 +640,53 @@ h3 {
 
 .verb-result-button.selected strong {
   color: var(--teal-dark);
+}
+
+.favorite-item {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 38px;
+  gap: 6px;
+}
+
+.favorite-practice-button {
+  display: grid;
+  gap: 2px;
+  width: 100%;
+  min-height: 52px;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  background: var(--surface-soft);
+  padding: 8px 10px;
+  color: var(--ink);
+  text-align: left;
+  cursor: pointer;
+}
+
+.favorite-practice-button:hover {
+  border-color: var(--teal);
+  background: #eef8f6;
+}
+
+.favorite-practice-button strong {
+  overflow-wrap: anywhere;
+}
+
+.favorite-practice-button span {
+  color: var(--muted);
+  font-size: 0.78rem;
+  font-weight: 750;
+}
+
+.favorite-remove-button {
+  display: grid;
+  place-items: center;
+  width: 38px;
+  min-width: 38px;
+  min-height: 52px;
+  padding: 0;
+  background: var(--surface);
+  color: var(--rose);
+  font-weight: 900;
 }
 
 .meter {
@@ -729,7 +815,12 @@ h3 {
 
   .prompt {
     min-height: 78px;
-    font-size: 1.45rem;
+    font-size: 1.3rem;
+    line-height: 1.34;
+  }
+
+  .blank {
+    width: 1.5em;
   }
 }
 

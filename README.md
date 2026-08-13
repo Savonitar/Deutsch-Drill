@@ -6,7 +6,7 @@ A static German training page for:
 - verbs with prepositions
 
 The app has no backend, no external requests, and no scraped dictionary data.
-All exercise data is hand-authored or derived from grammar tables in `app.js`.
+Exercise data is stored locally in `app.js` and the static files under `data/`.
 Progress is stored locally in the browser with `localStorage`.
 
 ## Training Modes
@@ -20,6 +20,7 @@ Progress is stored locally in the browser with `localStorage`.
 - Verb preposition-case questions
 - Full verb-pattern recognition, such as `warten auf + Akkusativ`
 - Custom verb training lists with search, bulk paste, and selected-only practice
+- Favourite drills with saved-list replay by topic
 - Immediate answer scoring for verb practice
 - Verb translations in English, Russian, Ukrainian, and Turkish for the starter set
 - Mistake-history review for repeated practice
