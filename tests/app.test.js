@@ -127,6 +127,8 @@ vm.runInContext(`${app}
   const cases = Object.keys(CASES);
   const genders = Object.keys(GENDERS);
   const articleTypes = Object.keys(ARTICLE_TYPES);
+  const translationLanguages = Object.keys(TRANSLATION_LANGUAGES);
+  const forbiddenTranslationText = ["coming soon", "placeholder", "todo", "tbd"];
 
   assert(NOUNS.length > 0, "NOUNS should not be empty");
   assert(STRONG_SINGULAR_NOUNS.length > 0, "STRONG_SINGULAR_NOUNS should not be empty");
@@ -162,7 +164,18 @@ vm.runInContext(`${app}
       !Object.prototype.hasOwnProperty.call(item, "meaning"),
       "Verb data should not store translations: " + item.id
     );
-    assert(VERB_TRANSLATIONS[item.id]?.en?.meaning, "Missing English meaning: " + item.id);
+    for (const language of translationLanguages) {
+      const translation = VERB_TRANSLATIONS[item.id]?.[language];
+      for (const field of ["verb", "meaning", "sentence"]) {
+        assert(translation?.[field], "Missing " + language + " " + field + ": " + item.id);
+        assert(
+          !forbiddenTranslationText.some((text) =>
+            translation[field].toLowerCase().includes(text)
+          ),
+          "Placeholder " + language + " " + field + ": " + item.id
+        );
+      }
+    }
     const verbSentences = verbSentencesFor(item);
     assert(
       verbSentences.length >= 3,
@@ -191,6 +204,10 @@ vm.runInContext(`${app}
       item.pattern.includes(CASES[item.caseKey]),
       "Pattern does not include case label: " + item.id
     );
+  }
+
+  for (const id of Object.keys(VERB_TRANSLATIONS)) {
+    assert(verbIds.has(id), "Translation references unknown verb id: " + id);
   }
 
   for (const mode of ["form", "ending", "case", "article", "gender"]) {
@@ -306,7 +323,11 @@ vm.runInContext(`${app}
   assert(!favoritesForTopic("verbs").length, "Clearing should remove topic favourites");
 
   appState.translationLanguage = "ru";
+  const verhandelnTranslations = VERB_TRANSLATIONS["verhandeln-mit-dat"];
+  const savedVerhandelnRu = verhandelnTranslations.ru;
+  delete verhandelnTranslations.ru;
   const untranslatedVerbFallback = verbTranslationFor(VERB_LOOKUP.get("verhandeln-mit-dat"));
+  verhandelnTranslations.ru = savedVerhandelnRu;
   assert(
     untranslatedVerbFallback.language === "en",
     "Missing selected-language verb translations should fall back to English"
