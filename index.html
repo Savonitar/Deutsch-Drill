@@ -49,7 +49,17 @@
               <span class="topic-kicker" id="topicKicker">Cases, gender, article type</span>
               <h2 id="topicTitle">Adjective ending</h2>
             </div>
-            <div class="pill" id="dataBadge">Static examples</div>
+            <div class="trainer-tools">
+              <button
+                class="favorite-button"
+                type="button"
+                id="favoriteButton"
+                aria-pressed="false"
+                aria-label="Add to favourites"
+                title="Add to favourites"
+              >☆</button>
+              <div class="pill" id="dataBadge">Static examples</div>
+            </div>
           </div>
 
           <div class="controls-row" id="controlsRow"></div>
@@ -134,6 +144,21 @@
             </div>
             <div class="verb-bulk-status" id="verbBulkStatus" aria-live="polite"></div>
             <ol class="verb-search-results" id="verbSearchResults"></ol>
+          </section>
+
+          <section class="stat-block favorite-list-block" id="favoriteListBlock">
+            <div class="section-title-row">
+              <h3>Favourites</h3>
+              <span id="favoriteCount">0 saved</span>
+            </div>
+            <label class="toggle-line">
+              <input type="checkbox" id="favoriteToggle">
+              <span>Train favourites</span>
+            </label>
+            <div class="favorite-list" id="favoriteList"></div>
+            <button class="ghost-button compact-button" type="button" id="favoriteClear">
+              Clear
+            </button>
           </section>
 
           <section class="stat-block">

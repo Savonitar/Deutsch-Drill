@@ -153,6 +153,8 @@ vm.runInContext(`${app}
   }
 
   const verbIds = new Set();
+  const rawVerbSentences = new Set();
+  const completedVerbSentences = new Set();
   for (const item of VERB_ITEMS) {
     assert(!verbIds.has(item.id), "Duplicate verb id: " + item.id);
     verbIds.add(item.id);
@@ -175,6 +177,14 @@ vm.runInContext(`${app}
         (sentence.match(/___/g) || []).length === 1,
         "Sentence must contain exactly one blank: " + item.id
       );
+      assert(!rawVerbSentences.has(sentence), "Duplicate verb sentence: " + sentence);
+      rawVerbSentences.add(sentence);
+      const completedSentence = completedVerbSentence(item, sentence);
+      assert(
+        !completedVerbSentences.has(completedSentence),
+        "Duplicate completed verb sentence: " + completedSentence
+      );
+      completedVerbSentences.add(completedSentence);
     }
     assert(item.pattern.includes(item.prep), "Pattern does not include preposition: " + item.id);
     assert(
@@ -256,6 +266,76 @@ vm.runInContext(`${app}
     "Language changes should refresh the current translation"
   );
 
+  appState.topic = "adjective";
+  appState.adjMode = "form";
+  appState.reviewOnly = false;
+  appState.favorites = emptyFavorites();
+  nextExercise();
+  const favoriteAdjective = appState.current;
+  toggleCurrentFavorite();
+  assert(isCurrentFavorite(), "Current drill should be saved as a favourite");
+  assert(favoritesForTopic("adjective").length === 1, "Adjective favourite should be listed");
+  setFavoriteTrainingEnabled(true);
+  assert(isFavoritesActive("adjective"), "Favourite-only adjective training should activate");
+  nextExercise();
+  assert(
+    appState.current.prompt === favoriteAdjective.prompt &&
+      appState.current.answer === favoriteAdjective.answer,
+    "Favourite training should replay saved adjective drills"
+  );
+  removeFavorite(favoriteSignatureFor(appState.current));
+  assert(!favoritesForTopic("adjective").length, "Removing should clear the adjective favourite");
+  assert(!isFavoritesActive("adjective"), "Empty favourites should disable favourite training");
+
+  appState.topic = "verbs";
+  appState.verbMode = "prep";
+  appState.trainingList.verbs = ["warten-auf-akk"];
+  appState.trainingList.useVerbList = true;
+  appState.reviewOnly = false;
+  nextExercise();
+  const favoriteVerb = appState.current;
+  toggleCurrentFavorite();
+  assert(favoritesForTopic("verbs").length === 1, "Verb favourite should be listed");
+  startFavorite(favoriteSignatureFor(favoriteVerb));
+  assert(
+    appState.current.prompt === favoriteVerb.prompt &&
+      appState.current.answer === favoriteVerb.answer,
+    "Starting a favourite should replay the saved verb drill"
+  );
+  clearTopicFavorites();
+  assert(!favoritesForTopic("verbs").length, "Clearing should remove topic favourites");
+
+  appState.translationLanguage = "ru";
+  const untranslatedVerbFallback = verbTranslationFor(VERB_LOOKUP.get("verhandeln-mit-dat"));
+  assert(
+    untranslatedVerbFallback.language === "en",
+    "Missing selected-language verb translations should fall back to English"
+  );
+  assert(
+    untranslatedVerbFallback.languageLabel === "English",
+    "Fallback translation should use the fallback language label"
+  );
+  assert(
+    untranslatedVerbFallback.meaning === "to negotiate with",
+    "Fallback translation should use the English meaning"
+  );
+  assert(
+    untranslatedVerbFallback.sentence !== "Translation coming soon.",
+    "Fallback translation should not render placeholder text"
+  );
+  renderTranslationPanel({
+    meta: [["Verb", "verhandeln"]],
+    translation: untranslatedVerbFallback
+  });
+  assert(
+    !elementMap
+      .get("#translationPanel")
+      .children.some((row) =>
+        row.children.some((child) => child.textContent === "Translation coming soon.")
+      ),
+    "Translation panel should not render placeholder example rows"
+  );
+
   appState.verbSearch = "kuemmern um";
   assert(
     matchingVerbItems().some((item) => item.id === "sich-kuemmern-um-akk"),
@@ -271,6 +351,72 @@ vm.runInContext(`${app}
     matchingVerbItems().some((item) => item.id === "achten-auf-akk"),
     "Search should match generated sentence variants"
   );
+  appState.verbSearch = "Ampel";
+  assert(
+    matchingVerbItems().some((item) => item.id === "achten-auf-akk"),
+    "Search should match newly imported sentence variants"
+  );
+
+  appState.topic = "verbs";
+  appState.verbMode = "prep";
+  appState.trainingList.verbs = ["warten-auf-akk"];
+  appState.trainingList.useVerbList = true;
+  appState.reviewOnly = false;
+  appState.recentVerbSentenceKeys = [];
+  const smallListRecentSentences = [];
+  for (let index = 0; index < 9; index += 1) {
+    nextExercise();
+    const sentenceKey = verbSentenceKey(
+      VERB_LOOKUP.get(appState.current.verbItemId),
+      appState.current.verbSentence
+    );
+    assert(
+      !smallListRecentSentences.includes(sentenceKey),
+      "Single-verb lists should rotate available sentence variants before repeating"
+    );
+    smallListRecentSentences.push(sentenceKey);
+    if (smallListRecentSentences.length > 2) {
+      smallListRecentSentences.shift();
+    }
+  }
+
+  appState.trainingList.verbs = [
+    "achten-auf-akk",
+    "warten-auf-akk",
+    "sich-vorbereiten-auf-akk",
+    "sich-freuen-auf-akk",
+    "denken-an-akk",
+    "glauben-an-akk",
+    "sich-interessieren-fuer-akk",
+    "sich-entscheiden-fuer-akk",
+    "danken-fuer-akk",
+    "sprechen-mit-dat",
+    "sich-beschaeftigen-mit-dat",
+    "teilnehmen-an-dat",
+    "sich-beschweren-ueber-akk",
+    "traeumen-von-dat",
+    "abhaengen-von-dat",
+    "sich-kuemmern-um-akk",
+    "sich-verlieben-in-akk"
+  ];
+  appState.trainingList.useVerbList = true;
+  appState.recentVerbSentenceKeys = [];
+  const selectedListRecentSentences = [];
+  for (let index = 0; index < 40; index += 1) {
+    nextExercise();
+    const sentenceKey = verbSentenceKey(
+      VERB_LOOKUP.get(appState.current.verbItemId),
+      appState.current.verbSentence
+    );
+    assert(
+      !selectedListRecentSentences.includes(sentenceKey),
+      "Selected verb lists should not repeat a sentence inside the cooldown window"
+    );
+    selectedListRecentSentences.push(sentenceKey);
+    if (selectedListRecentSentences.length > VERB_SENTENCE_COOLDOWN) {
+      selectedListRecentSentences.shift();
+    }
+  }
 
   appState.verbSearch = [
     "achten",

@@ -3,6 +3,8 @@
 const STORE_KEY = "deutsch-drill-progress-v1";
 const TRAINING_LIST_KEY = "deutsch-drill-training-list-v1";
 const TRANSLATION_LANGUAGE_KEY = "deutsch-drill-translation-language-v1";
+const FAVORITES_KEY = "deutsch-drill-favourites-v1";
+const VERB_SENTENCE_COOLDOWN = 8;
 
 const CASES = {
   nom: "Nominativ",
@@ -405,6 +407,7 @@ const elements = {
   topicKicker: document.querySelector("#topicKicker"),
   topicTitle: document.querySelector("#topicTitle"),
   dataBadge: document.querySelector("#dataBadge"),
+  favoriteButton: document.querySelector("#favoriteButton"),
   controlsRow: document.querySelector("#controlsRow"),
   metaGrid: document.querySelector("#metaGrid"),
   promptText: document.querySelector("#promptText"),
@@ -429,7 +432,12 @@ const elements = {
   verbBulkAdd: document.querySelector("#verbBulkAdd"),
   verbBulkStatus: document.querySelector("#verbBulkStatus"),
   verbListClear: document.querySelector("#verbListClear"),
-  verbSearchResults: document.querySelector("#verbSearchResults")
+  verbSearchResults: document.querySelector("#verbSearchResults"),
+  favoriteListBlock: document.querySelector("#favoriteListBlock"),
+  favoriteCount: document.querySelector("#favoriteCount"),
+  favoriteToggle: document.querySelector("#favoriteToggle"),
+  favoriteList: document.querySelector("#favoriteList"),
+  favoriteClear: document.querySelector("#favoriteClear")
 };
 
 const appState = {
@@ -444,8 +452,10 @@ const appState = {
   current: null,
   selected: "",
   answered: false,
+  recentVerbSentenceKeys: [],
   progress: loadProgress(),
-  trainingList: loadTrainingList()
+  trainingList: loadTrainingList(),
+  favorites: loadFavorites()
 };
 
 function loadProgress() {
@@ -514,6 +524,119 @@ function saveTranslationLanguage() {
   localStorage.setItem(TRANSLATION_LANGUAGE_KEY, appState.translationLanguage);
 }
 
+function loadFavorites() {
+  try {
+    const saved = JSON.parse(localStorage.getItem(FAVORITES_KEY));
+    if (saved && typeof saved === "object") {
+      const items = sanitizeFavorites(saved.items);
+      return {
+        items,
+        useFavorites: sanitizeFavoriteUsage(saved.useFavorites, items)
+      };
+    }
+  } catch (error) {
+    localStorage.removeItem(FAVORITES_KEY);
+  }
+  return emptyFavorites();
+}
+
+function emptyFavorites() {
+  return {
+    items: [],
+    useFavorites: { adjective: false, verbs: false }
+  };
+}
+
+function saveFavorites() {
+  appState.favorites.items = sanitizeFavorites(appState.favorites.items);
+  appState.favorites.useFavorites = sanitizeFavoriteUsage(
+    appState.favorites.useFavorites,
+    appState.favorites.items
+  );
+  localStorage.setItem(FAVORITES_KEY, JSON.stringify(appState.favorites));
+}
+
+function sanitizeFavoriteUsage(value, items) {
+  const counts = favoriteCountsByTopic(items);
+  return {
+    adjective: Boolean(value?.adjective) && counts.adjective > 0,
+    verbs: Boolean(value?.verbs) && counts.verbs > 0
+  };
+}
+
+function favoriteCountsByTopic(items) {
+  return items.reduce(
+    (counts, favorite) => {
+      if (favorite.topic === "adjective" || favorite.topic === "verbs") {
+        counts[favorite.topic] += 1;
+      }
+      return counts;
+    },
+    { adjective: 0, verbs: 0 }
+  );
+}
+
+function sanitizeFavorites(items) {
+  if (!Array.isArray(items)) {
+    return [];
+  }
+  const seen = new Set();
+  return items
+    .map((favorite) => sanitizeFavorite(favorite))
+    .filter(Boolean)
+    .filter((favorite) => {
+      const keep = !seen.has(favorite.signature);
+      seen.add(favorite.signature);
+      return keep;
+    })
+    .slice(0, 120);
+}
+
+function sanitizeFavorite(favorite) {
+  const exercise = sanitizeExerciseSnapshot(favorite?.exercise);
+  if (!exercise) {
+    return null;
+  }
+  return {
+    signature: String(favorite.signature || favoriteSignatureFor(exercise)),
+    topic: exercise.topic,
+    exercise,
+    at: Number(favorite.at) || Date.now()
+  };
+}
+
+function sanitizeExerciseSnapshot(exercise) {
+  if (
+    !exercise ||
+    (exercise.topic !== "adjective" && exercise.topic !== "verbs") ||
+    typeof exercise.id !== "string" ||
+    typeof exercise.title !== "string" ||
+    typeof exercise.prompt !== "string" ||
+    typeof exercise.answer !== "string" ||
+    !Array.isArray(exercise.options) ||
+    !exercise.options.includes(exercise.answer) ||
+    !Array.isArray(exercise.meta)
+  ) {
+    return null;
+  }
+
+  return {
+    topic: exercise.topic,
+    verbItemId: exercise.verbItemId,
+    verbSentence: exercise.verbSentence,
+    id: exercise.id,
+    title: exercise.title,
+    prompt: exercise.prompt,
+    answer: exercise.answer,
+    options: [...exercise.options],
+    meta: exercise.meta
+      .filter((row) => Array.isArray(row) && row.length >= 2)
+      .map(([label, value]) => [String(label), String(value)])
+      .filter(([label]) => label !== "Review" && label !== "Favourite"),
+    explanation: String(exercise.explanation || "")
+  };
+}
+
 function completedVerbSentence(item, sentence = item.sentence) {
   return sentence.replace("___", item.prep);
 }
@@ -525,31 +648,92 @@ function verbSentencesFor(item) {
   return [item.sentence];
 }
 
-function sampleVerbSentence(item) {
-  return sample(verbSentencesFor(item));
+function verbSentenceKey(item, sentence) {
+  return `${item.id}\u0000${sentence}`;
+}
+
+function verbItemWeight(item) {
+  const prepStats = getItemStats(`verb-prep:${item.id}`);
+  const caseStats = getItemStats(`verb-case:${item.id}`);
+  const patternStats = getItemStats(`verb-pattern:${item.id}`);
+  const mastery = Math.min(prepStats.mastery, caseStats.mastery, patternStats.mastery);
+  return Math.max(1, 6 - mastery);
+}
+
+function verbSentenceCooldownLimit(candidates) {
+  return Math.min(VERB_SENTENCE_COOLDOWN, Math.max(0, candidates.length - 1));
+}
+
+function trimRecentVerbSentenceKeys(candidates, nextKey = "") {
+  const activeKeys = new Set(candidates.map((candidate) => candidate.key));
+  const limit = verbSentenceCooldownLimit(candidates);
+  if (limit === 0) {
+    appState.recentVerbSentenceKeys = [];
+    return;
+  }
+  appState.recentVerbSentenceKeys = appState.recentVerbSentenceKeys
+    .filter((key) => activeKeys.has(key) && key !== nextKey)
+    .slice(-limit);
+}
+
+function rememberVerbSentence(candidates, key) {
+  trimRecentVerbSentenceKeys(candidates, key);
+  const limit = verbSentenceCooldownLimit(candidates);
+  if (limit > 0) {
+    appState.recentVerbSentenceKeys.push(key);
+    appState.recentVerbSentenceKeys = appState.recentVerbSentenceKeys.slice(-limit);
+  }
+}
+
+function pickVerbExerciseSource(items) {
+  const candidates = items.flatMap((item) =>
+    verbSentencesFor(item).map((sentence) => ({
+      item,
+      sentence,
+      key: verbSentenceKey(item, sentence)
+    }))
+  );
+  trimRecentVerbSentenceKeys(candidates);
+  const recentKeys = new Set(appState.recentVerbSentenceKeys);
+  const freshCandidates = candidates.filter((candidate) => !recentKeys.has(candidate.key));
+  const pool = freshCandidates.length ? freshCandidates : candidates;
+  const weighted = pool.flatMap((candidate) =>
+    Array.from({ length: verbItemWeight(candidate.item) }, () => candidate)
+  );
+  const selected = sample(weighted);
+  rememberVerbSentence(candidates, selected.key);
+  return selected;
 }
 
 function verbMeaningFor(item) {
   return VERB_TRANSLATIONS[item.id]?.en?.meaning || item.pattern;
 }
 
+function availableVerbTranslation(item, language) {
+  const translations = VERB_TRANSLATIONS[item.id] || {};
+  if (translations[language]) {
+    return { language, entry: translations[language] };
+  }
+  if (translations.en) {
+    return { language: "en", entry: translations.en };
+  }
+  return { language, entry: {} };
+}
+
 function verbTranslationFor(item, sentence = item.sentence) {
-  const language = Object.prototype.hasOwnProperty.call(
+  const requestedLanguage = Object.prototype.hasOwnProperty.call(
     TRANSLATION_LANGUAGES,
     appState.translationLanguage
   )
     ? appState.translationLanguage
     : "en";
-  const base = {
+  const { language, entry } = availableVerbTranslation(item, requestedLanguage);
+  return {
     language,
     languageLabel: TRANSLATION_LANGUAGES[language],
-    verb: item.verb,
-    meaning: verbMeaningFor(item),
-    sentence: language === "en" ? completedVerbSentence(item, sentence) : "Translation coming soon."
-  };
-  return {
-    ...base,
-    ...(VERB_TRANSLATIONS[item.id]?.[language] || VERB_TRANSLATIONS[item.id]?.en || {})
+    verb: entry.verb || item.verb,
+    meaning: entry.meaning || verbMeaningFor(item),
+    sentence: entry.sentence || ""
   };
 }
 
@@ -586,6 +770,16 @@ function isVerbListActive() {
 function activeVerbItems() {
   const items = selectedVerbItems();
   return isVerbListActive() && items.length ? items : VERB_ITEMS;
+}
+
+function favoritesForTopic(topic = appState.topic) {
+  return appState.favorites.items.filter(
+    (favorite) => favorite.topic === topic && favorite.exercise
+  );
+}
+
+function isFavoritesActive(topic = appState.topic) {
+  return Boolean(appState.favorites.useFavorites?.[topic]) && favoritesForTopic(topic).length > 0;
 }
 
 function verbPatternLabel(item) {
@@ -829,16 +1023,25 @@ function mistakeSignature(exercise) {
   return exercise.reviewSignature || `${exercise.id}|${exercise.prompt}|${exercise.answer}`;
 }
 
+function favoriteSignatureFor(exercise) {
+  return (
+    exercise.favoriteSignature ||
+    exercise.reviewSignature ||
+    `${exercise.id}|${exercise.prompt}|${exercise.answer}`
+  );
+}
+
 function exerciseSnapshot(exercise) {
   return {
     topic: exercise.topic,
     verbItemId: exercise.verbItemId,
+    verbSentence: exercise.verbSentence,
     id: exercise.id,
     title: exercise.title,
     prompt: exercise.prompt,
     answer: exercise.answer,
     options: [...exercise.options],
-    meta: exercise.meta.filter(([label]) => label !== "Review"),
+    meta: exercise.meta.filter(([label]) => label !== "Review" && label !== "Favourite"),
     explanation: exercise.explanation
   };
 }
@@ -859,6 +1062,106 @@ function exerciseFromMistake(miss) {
     );
   }
   return exercise;
+}
+
+function exerciseFromFavorite(favorite) {
+  const exercise = {
+    ...favorite.exercise,
+    options: [...favorite.exercise.options],
+    meta: [["Favourite", "Saved drill"], ...favorite.exercise.meta],
+    favoriteSignature: favorite.signature
+  };
+  if (exercise.verbItemId && VERB_LOOKUP.has(exercise.verbItemId)) {
+    const item = VERB_LOOKUP.get(exercise.verbItemId);
+    const translation = verbTranslationFor(item, exercise.verbSentence || item.sentence);
+    exercise.translation = translation;
+    exercise.meta = exercise.meta.map(([label, value]) =>
+      label === "Meaning" ? [label, translation.meaning] : [label, value]
+    );
+  }
+  return exercise;
+}
+
+function currentFavoriteIndex() {
+  if (!appState.current) {
+    return -1;
+  }
+  const signature = favoriteSignatureFor(appState.current);
+  return appState.favorites.items.findIndex((favorite) => favorite.signature === signature);
+}
+
+function isCurrentFavorite() {
+  return currentFavoriteIndex() >= 0;
+}
+
+function toggleCurrentFavorite() {
+  if (!appState.current) {
+    return;
+  }
+  const index = currentFavoriteIndex();
+  if (index >= 0) {
+    appState.favorites.items.splice(index, 1);
+  } else {
+    const snapshot = exerciseSnapshot(appState.current);
+    appState.favorites.items.unshift({
+      signature: favoriteSignatureFor(appState.current),
+      topic: snapshot.topic,
+      exercise: snapshot,
+      at: Date.now()
+    });
+  }
+  saveFavorites();
+  render();
+}
+
+function setFavoriteTrainingEnabled(enabled) {
+  appState.favorites.useFavorites[appState.topic] = enabled && favoritesForTopic().length > 0;
+  appState.reviewOnly = false;
+  saveFavorites();
+  nextExercise();
+}
+
+function startFavorite(signature) {
+  const favorite = appState.favorites.items.find((candidate) => candidate.signature === signature);
+  if (!favorite) {
+    return;
+  }
+  appState.topic = favorite.topic;
+  appState.reviewOnly = false;
+  appState.current = exerciseFromFavorite(favorite);
+  appState.selected = "";
+  appState.answered = false;
+  elements.feedbackBox.textContent = "";
+  elements.feedbackBox.className = "feedback";
+  render();
+}
+
+function removeFavorite(signature) {
+  const wasActive = isFavoritesActive();
+  appState.favorites.items = appState.favorites.items.filter(
+    (favorite) => favorite.signature !== signature
+  );
+  saveFavorites();
+  if (wasActive && !isFavoritesActive() && !appState.reviewOnly) {
+    nextExercise();
+  } else {
+    render();
+  }
+}
+
+function clearTopicFavorites() {
+  const topic = appState.topic;
+  const wasActive = isFavoritesActive(topic);
+  appState.favorites.items = appState.favorites.items.filter(
+    (favorite) => favorite.topic !== topic
+  );
+  appState.favorites.useFavorites[topic] = false;
+  saveFavorites();
+  if (wasActive && !appState.reviewOnly) {
+    nextExercise();
+  } else {
+    render();
+  }
 }
 
 function recordMistake(exercise, selected) {
@@ -1069,9 +1372,8 @@ function buildAdjectiveExercise() {
 }
 
 function buildVerbExercise() {
-  const item = weightedPick(activeVerbItems());
+  const { item, sentence } = pickVerbExerciseSource(activeVerbItems());
   const mode = appState.verbMode;
-  const sentence = sampleVerbSentence(item);
   const completedSentence = sentence.replace("___", item.prep);
   const translation = verbTranslationFor(item, sentence);
 
@@ -1142,16 +1444,8 @@ function buildVerbExercise() {
   };
 }
 
-function weightedPick(items) {
-  const weighted = items.flatMap((item) => {
-    const prepStats = getItemStats(`verb-prep:${item.id}`);
-    const caseStats = getItemStats(`verb-case:${item.id}`);
-    const patternStats = getItemStats(`verb-pattern:${item.id}`);
-    const mastery = Math.min(prepStats.mastery, caseStats.mastery, patternStats.mastery);
-    const weight = Math.max(1, 6 - mastery);
-    return Array.from({ length: weight }, () => item);
-  });
-  return sample(weighted);
+function buildStandardExercise() {
+  return appState.topic === "adjective" ? buildAdjectiveExercise() : buildVerbExercise();
 }
 
 function nextExercise() {
@@ -1161,12 +1455,12 @@ function nextExercise() {
       appState.current = exerciseFromMistake(miss);
     } else {
       appState.reviewOnly = false;
-      appState.current =
-        appState.topic === "adjective" ? buildAdjectiveExercise() : buildVerbExercise();
+      appState.current = buildStandardExercise();
     }
+  } else if (isFavoritesActive()) {
+    appState.current = exerciseFromFavorite(sample(favoritesForTopic()));
   } else {
-    appState.current =
-      appState.topic === "adjective" ? buildAdjectiveExercise() : buildVerbExercise();
+    appState.current = buildStandardExercise();
   }
   appState.selected = "";
   appState.answered = false;
@@ -1196,6 +1490,7 @@ function render() {
   renderControls();
   renderQuestion();
   renderVerbTrainingList();
+  renderFavoriteList();
   renderTopicStats();
 }
 
@@ -1267,8 +1562,14 @@ function renderControls() {
     button.addEventListener("click", () => {
       if (kind === "review") {
         appState.reviewOnly = !appState.reviewOnly;
+        if (appState.reviewOnly) {
+          appState.favorites.useFavorites[appState.topic] = false;
+          saveFavorites();
+        }
       } else if (appState.topic === "adjective") {
         appState.reviewOnly = false;
+        appState.favorites.useFavorites[appState.topic] = false;
+        saveFavorites();
         if (kind === "mode") {
           appState.adjMode = value;
         } else {
@@ -1276,6 +1577,8 @@ function renderControls() {
         }
       } else {
         appState.reviewOnly = false;
+        appState.favorites.useFavorites[appState.topic] = false;
+        saveFavorites();
         appState.verbMode = value;
       }
       nextExercise();
@@ -1286,6 +1589,15 @@ function renderControls() {
 
 function renderQuestion() {
   const exercise = appState.current;
+  const favorited = isCurrentFavorite();
+  elements.favoriteButton.textContent = favorited ? "★" : "☆";
+  elements.favoriteButton.classList.toggle("active", favorited);
+  elements.favoriteButton.setAttribute("aria-pressed", String(favorited));
+  elements.favoriteButton.setAttribute(
+    "aria-label",
+    favorited ? "Remove from favourites" : "Add to favourites"
+  );
+  elements.favoriteButton.title = favorited ? "Remove from favourites" : "Add to favourites";
   elements.metaGrid.replaceChildren();
   exercise.meta.forEach(([label, value]) => {
     const item = document.createElement("div");
@@ -1338,12 +1650,16 @@ function renderTranslationPanel(exercise) {
     return;
   }
 
-  [
+  const rows = [
     ["Language", exercise.translation.languageLabel],
     ["Verb", `${exercise.meta.find(([label]) => label === "Verb")?.[1] || ""} = ${exercise.translation.verb}`],
-    ["Meaning", exercise.translation.meaning],
-    ["Example", exercise.translation.sentence]
-  ].forEach(([label, value]) => {
+    ["Meaning", exercise.translation.meaning]
+  ];
+  if (exercise.translation.sentence) {
+    rows.push(["Example", exercise.translation.sentence]);
+  }
+
+  rows.forEach(([label, value]) => {
     const row = document.createElement("div");
     row.className = "translation-row";
     const labelEl = document.createElement("span");
@@ -1492,6 +1808,50 @@ function renderVerbTrainingList() {
   });
 }
 
+function renderFavoriteList() {
+  const topicFavorites = favoritesForTopic();
+  elements.favoriteListBlock.classList.toggle("hidden", false);
+  elements.favoriteCount.textContent = `${topicFavorites.length} saved`;
+  elements.favoriteToggle.checked = isFavoritesActive();
+  elements.favoriteToggle.disabled = !topicFavorites.length;
+  elements.favoriteClear.disabled = !topicFavorites.length;
+  elements.favoriteList.replaceChildren();
+
+  if (!topicFavorites.length) {
+    const empty = document.createElement("div");
+    empty.className = "favorite-empty";
+    empty.textContent = "No favourites yet.";
+    elements.favoriteList.append(empty);
+    return;
+  }
+
+  topicFavorites.forEach((favorite) => {
+    const item = document.createElement("div");
+    item.className = "favorite-item";
+
+    const practiceButton = document.createElement("button");
+    practiceButton.type = "button";
+    practiceButton.className = "favorite-practice-button";
+    const answer = document.createElement("strong");
+    answer.textContent = favorite.exercise.answer;
+    const detail = document.createElement("span");
+    detail.textContent = favorite.exercise.title;
+    practiceButton.append(answer, detail);
+    practiceButton.addEventListener("click", () => startFavorite(favorite.signature));
+
+    const removeButton = document.createElement("button");
+    removeButton.type = "button";
+    removeButton.className = "favorite-remove-button";
+    removeButton.title = "Remove";
+    removeButton.setAttribute("aria-label", "Remove favourite");
+    removeButton.textContent = "x";
+    removeButton.addEventListener("click", () => removeFavorite(favorite.signature));
+
+    item.append(practiceButton, removeButton);
+    elements.favoriteList.append(item);
+  });
+}
+
 function submitAnswer() {
   if (!appState.selected || appState.answered) {
     elements.feedbackBox.textContent = "Choose an answer first.";
@@ -1563,6 +1923,7 @@ elements.topicButtons.forEach((button) => {
 elements.submitButton.addEventListener("click", submitAnswer);
 elements.nextButton.addEventListener("click", nextExercise);
 elements.resetButton.addEventListener("click", resetProgress);
+elements.favoriteButton.addEventListener("click", toggleCurrentFavorite);
 elements.verbSearchInput.addEventListener("input", (event) => {
   appState.verbSearch = event.target.value;
   appState.verbBulkStatus = "";
@@ -1584,5 +1945,9 @@ elements.translationLanguage.addEventListener("change", (event) => {
   render();
 });
 elements.verbListClear.addEventListener("click", clearVerbTrainingList);
+elements.favoriteToggle.addEventListener("change", (event) => {
+  setFavoriteTrainingEnabled(event.target.checked);
+});
+elements.favoriteClear.addEventListener("click", clearTopicFavorites);
 
 nextExercise();

@@ -10,7 +10,9 @@ const VERB_ITEMS = [
     sentences: [
       "Achte ___ den Verkehr.",
       "Bitte achten Sie ___ den Gegenverkehr.",
-      "Beim Kochen sollte man ___ die Temperatur achten."
+      "Beim Kochen sollte man ___ die Temperatur achten.",
+      "Achte bitte ___ die Ampel an der nächsten Kreuzung.",
+      "Sie muss im Straßenverkehr besonders ___ die Fußgänger achten."
     ],
     pattern: "achten auf + Akkusativ"
   },
@@ -23,7 +25,9 @@ const VERB_ITEMS = [
     sentences: [
       "Ich warte ___ den Bus.",
       "Wir warten am Bahnhof ___ den nächsten Zug.",
-      "Sie wartet seit einer Stunde ___ eine wichtige Antwort."
+      "Sie wartet seit einer Stunde ___ eine wichtige Antwort.",
+      "Er wartet seit zwei Wochen ___ ein wichtiges Paket.",
+      "Wir warten im Restaurant ___ die Speisekarte."
     ],
     pattern: "warten auf + Akkusativ"
   },
@@ -88,7 +92,9 @@ const VERB_ITEMS = [
     sentences: [
       "Ich freue mich ___ den Urlaub.",
       "Die Kinder freuen sich schon ___ die Sommerferien.",
-      "Ich freue mich sehr ___ unseren nächsten Urlaub."
+      "Ich freue mich sehr ___ unseren nächsten Urlaub.",
+      "Alle freuen sich riesig ___ das Konzert am Wochenende.",
+      "Wir freuen uns schon ___ das gemeinsame Abendessen."
     ],
     pattern: "sich freuen auf + Akkusativ"
   },
@@ -127,7 +133,9 @@ const VERB_ITEMS = [
     sentences: [
       "Ich bereite mich ___ die Prüfung vor.",
       "Die Studenten bereiten sich ___ die schwere Prüfung vor.",
-      "Er bereitet sich intensiv ___ das Vorstellungsgespräch vor."
+      "Er bereitet sich intensiv ___ das Vorstellungsgespräch vor.",
+      "Die Sportler bereiten sich gründlich ___ den Wettkampf vor.",
+      "Ich muss mich heute Abend ___ das Vorstellungsgespräch vorbereiten."
     ],
     pattern: "sich vorbereiten auf + Akkusativ"
   },
@@ -166,7 +174,9 @@ const VERB_ITEMS = [
     sentences: [
       "Denkst du ___ den Termin?",
       "Ich denke oft ___ meine schöne Kindheit.",
-      "Hast du ___ den Termin am Nachmittag gedacht?"
+      "Hast du ___ den Termin am Nachmittag gedacht?",
+      "Denk bitte ___ die Schlüssel auf dem Tisch.",
+      "Sie denkt oft ___ ihren Urlaub in Italien."
     ],
     pattern: "denken an + Akkusativ"
   },
@@ -179,7 +189,9 @@ const VERB_ITEMS = [
     sentences: [
       "Wir glauben ___ den Erfolg.",
       "Viele Kinder glauben ___ den Weihnachtsmann.",
-      "Man sollte immer ___ den eigenen Erfolg glauben."
+      "Man sollte immer ___ den eigenen Erfolg glauben.",
+      "Du solltest immer ___ deine eigenen Stärken glauben.",
+      "Er glaubt fest ___ eine gerechte Welt."
     ],
     pattern: "glauben an + Akkusativ"
   },
@@ -322,7 +334,9 @@ const VERB_ITEMS = [
     sentences: [
       "Er nimmt ___ dem Kurs teil.",
       "Morgen nehme ich ___ einem wichtigen Seminar teil.",
-      "Wer möchte ___ diesem Sprachkurs teilnehmen?"
+      "Wer möchte ___ diesem Sprachkurs teilnehmen?",
+      "Möchtest du auch ___ unserem wöchentlichen Treffen teilnehmen?",
+      "Viele Sportler nehmen ___ dem internationalen Marathon teil."
     ],
     pattern: "teilnehmen an + Dativ"
   },
@@ -439,7 +453,9 @@ const VERB_ITEMS = [
     sentences: [
       "Ich danke dir ___ den Hinweis.",
       "Ich danke dir herzlich ___ deine wertvolle Hilfe.",
-      "Wir danken Ihnen ___ die schnelle Bearbeitung."
+      "Wir danken Ihnen ___ die schnelle Bearbeitung.",
+      "Ich danke Ihnen herzlich ___ das ausführliche Gespräch.",
+      "Wir danken allen Helfern ___ die große Unterstützung."
     ],
     pattern: "danken für + Akkusativ"
   },
@@ -452,7 +468,9 @@ const VERB_ITEMS = [
     sentences: [
       "Er entscheidet sich ___ den Kurs.",
       "Sie hat sich ___ ein Medizinstudium entschieden.",
-      "Wir haben uns schlussendlich ___ das blaue Modell entschieden."
+      "Wir haben uns schlussendlich ___ das blaue Modell entschieden.",
+      "Er hat sich spontan ___ das schwarze Fahrrad entschieden.",
+      "Habt ihr euch schon ___ ein passendes Hotel entschieden?"
     ],
     pattern: "sich entscheiden für + Akkusativ"
   },
@@ -478,7 +496,9 @@ const VERB_ITEMS = [
     sentences: [
       "Lina interessiert sich ___ den Film.",
       "Mein Bruder interessiert sich sehr ___ klassische Musik.",
-      "Interessierst du dich ___ fremde Kulturen?"
+      "Interessierst du dich ___ fremde Kulturen?",
+      "Interessierst du dich ___ moderne Kunst und Musik?",
+      "Mein Vater interessiert sich sehr ___ alte Autos."
     ],
     pattern: "sich interessieren für + Akkusativ"
   },
@@ -517,7 +537,9 @@ const VERB_ITEMS = [
     sentences: [
       "Sie verliebt sich ___ den Nachbarn.",
       "Er hat sich auf den ersten Blick ___ seine Kollegin verliebt.",
-      "Sie verliebten sich im Urlaub ___ diese schöne Insel."
+      "Sie verliebten sich im Urlaub ___ diese schöne Insel.",
+      "Er verliebte sich sofort ___ ihren besonderen Charme.",
+      "Sie hat sich während ihres Studiums ___ eine wunderschöne Stadt verliebt."
     ],
     pattern: "sich verlieben in + Akkusativ"
   },
@@ -595,7 +617,9 @@ const VERB_ITEMS = [
     sentences: [
       "Sie beschäftigt sich ___ der Aufgabe.",
       "In seiner Freizeit beschäftigt er sich intensiv ___ Geschichte.",
-      "Das Buch beschäftigt sich ausführlich ___ diesem Thema."
+      "Das Buch beschäftigt sich ausführlich ___ diesem Thema.",
+      "Das Team beschäftigt sich zurzeit ___ einer schwierigen Aufgabe.",
+      "In seiner Freizeit beschäftigt er sich gerne ___ Grafikdesign."
     ],
     pattern: "sich beschäftigen mit + Dativ"
   },
@@ -621,7 +645,9 @@ const VERB_ITEMS = [
     sentences: [
       "Ich spreche ___ meinem Lehrer.",
       "Hast du gestern schon ___ dem Vermieter gesprochen?",
-      "Ich muss unbedingt ___ meiner Ärztin sprechen."
+      "Ich muss unbedingt ___ meiner Ärztin sprechen.",
+      "Kann ich bitte kurz ___ dem Abteilungsleiter sprechen?",
+      "Sie spricht jeden Abend ___ ihren Großeltern."
     ],
     pattern: "sprechen mit + Dativ"
   },
@@ -959,7 +985,9 @@ const VERB_ITEMS = [
     sentences: [
       "Sie kümmert sich ___ die Anmeldung.",
       "Wer kümmert sich während der Reise ___ den Hund?",
-      "Ich kümmere mich gern ___ die Organisation des Fests."
+      "Ich kümmere mich gern ___ die Organisation des Fests.",
+      "Der Arzt kümmert sich sorgfältig ___ den kranken Patienten.",
+      "Kannst du dich bitte ___ die Abholung der Dokumente kümmern?"
     ],
     pattern: "sich kümmern um + Akkusativ"
   },
@@ -1050,7 +1078,9 @@ const VERB_ITEMS = [
     sentences: [
       "Wir sprechen ___ das Wetter.",
       "Wir haben gestern stundenlang ___ alte Zeiten gesprochen.",
-      "Im Meeting müssen wir ___ die neue Strategie sprechen."
+      "Im Meeting müssen wir ___ die neue Strategie sprechen.",
+      "Sie haben gestern lange ___ die Zukunft der Firma gesprochen.",
+      "Wir müssen dringend ___ den neuen Termin sprechen."
     ],
     pattern: "sprechen über + Akkusativ"
   },
@@ -1115,7 +1145,9 @@ const VERB_ITEMS = [
     sentences: [
       "Der Kunde beschwert sich ___ den Lärm.",
       "Der Gast beschwert sich ___ das kalte Essen.",
-      "Viele Anwohner beschwerten sich ___ den lauten Baulärm."
+      "Viele Anwohner beschwerten sich ___ den lauten Baulärm.",
+      "Der Mieter beschwert sich ___ den ständigen Baulärm.",
+      "Sie beschwerten sich im Restaurant ___ den schlechten Service."
     ],
     pattern: "sich beschweren über + Akkusativ"
   },
@@ -1128,7 +1160,9 @@ const VERB_ITEMS = [
     sentences: [
       "Sie freut sich ___ das Geschenk.",
       "Sie hat sich riesig ___ das unerwartete Geschenk gefreut.",
-      "Wir freuen uns sehr ___ deinen Besuch."
+      "Wir freuen uns sehr ___ deinen Besuch.",
+      "Er freut sich sehr ___ das liebe Geschenk.",
+      "Sie hat sich enorm ___ deinen Anruf gefreut."
     ],
     pattern: "sich freuen über + Akkusativ"
   },
@@ -1193,7 +1227,9 @@ const VERB_ITEMS = [
     sentences: [
       "Das hängt ___ deiner Entscheidung ab.",
       "Der Erfolg hängt maßgeblich ___ deinem eigenen Einsatz ab.",
-      "Unsere Pläne hängen stark ___ dem aktuellen Wetter ab."
+      "Unsere Pläne hängen stark ___ dem aktuellen Wetter ab.",
+      "Die Entscheidung hängt ___ vielen verschiedenen Faktoren ab.",
+      "Ob das Spiel stattfindet, hängt ___ den Wetterbedingungen ab."
     ],
     pattern: "abhängen von + Dativ"
   },
@@ -1206,7 +1242,9 @@ const VERB_ITEMS = [
     sentences: [
       "Ich träume ___ einem Haus am Meer.",
       "Sie träumt schon seit Jahren ___ einer Weltreise.",
-      "Er träumte heute Nacht ___ einem langen Urlaub."
+      "Er träumte heute Nacht ___ einem langen Urlaub.",
+      "Er träumt schon lange ___ einem eigenen kleinen Haus im Grünen.",
+      "Ich habe heute Nacht ___ einer wunderschönen Reise geträumt."
     ],
     pattern: "träumen von + Dativ"
   },
