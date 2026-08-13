@@ -23,10 +23,9 @@ Progress is stored locally in the browser with `localStorage`.
 
 ## GitHub Pages
 
-1. Create a repository.
-2. Put `index.html`, `styles.css`, `app.js`, and `.nojekyll` in the repository root.
-3. Enable GitHub Pages from the repository settings.
-4. Select the root of the main branch as the publishing source.
+The repository includes a GitHub Actions workflow that deploys the static site
+to Pages whenever `main` is updated. In the repository settings, set Pages to
+use GitHub Actions as the source.
 
 ## Local Preview
 
