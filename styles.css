@@ -310,6 +310,33 @@ h3 {
   color: var(--rose);
 }
 
+.translation-panel {
+  display: grid;
+  gap: 8px;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  background: var(--surface);
+  padding: 12px;
+}
+
+.translation-row {
+  display: grid;
+  gap: 2px;
+}
+
+.translation-row span {
+  color: var(--muted);
+  font-size: 0.72rem;
+  font-weight: 800;
+  text-transform: uppercase;
+}
+
+.translation-row strong {
+  color: var(--ink);
+  font-size: 0.95rem;
+  line-height: 1.35;
+}
+
 .feedback-row {
   display: flex;
   align-items: center;
@@ -337,6 +364,10 @@ h3 {
   display: flex;
   gap: 8px;
   flex: 0 0 auto;
+}
+
+.actions.verb-actions {
+  justify-content: flex-end;
 }
 
 .primary-button,
@@ -410,11 +441,33 @@ h3 {
   gap: 6px;
 }
 
-.search-field label {
+.search-field label,
+.select-field label {
   color: var(--muted);
   font-size: 0.72rem;
   font-weight: 800;
   text-transform: uppercase;
+}
+
+.select-field {
+  display: grid;
+  gap: 6px;
+}
+
+.select-field select {
+  width: 100%;
+  min-height: 42px;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  background: var(--surface);
+  color: var(--ink);
+  font: inherit;
+  padding: 8px 10px;
+}
+
+.select-field select:focus {
+  border-color: var(--teal);
+  outline: 2px solid rgba(15, 118, 110, 0.18);
 }
 
 .search-field input,
