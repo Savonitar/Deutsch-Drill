@@ -2,6 +2,7 @@
 
 const STORE_KEY = "deutsch-drill-progress-v1";
 const TRAINING_LIST_KEY = "deutsch-drill-training-list-v1";
+const TRANSLATION_LANGUAGE_KEY = "deutsch-drill-translation-language-v1";
 
 const CASES = {
   nom: "Nominativ",
@@ -1346,6 +1347,162 @@ const PREPOSITIONS = Array.from(new Set(VERB_ITEMS.map((item) => item.prep))).so
 const VERB_LOOKUP = new Map(VERB_ITEMS.map((item) => [item.id, item]));
 const VERB_IDS = new Set(VERB_LOOKUP.keys());
 
+const TRANSLATION_LANGUAGES = {
+  en: "English",
+  ru: "Русский",
+  uk: "Українська",
+  tr: "Türkçe"
+};
+
+const VERB_TRANSLATIONS = {
+  "achten-auf-akk": {
+    en: {
+      verb: "to pay attention",
+      meaning: "to pay attention to",
+      sentence: "Pay attention to the traffic."
+    },
+    ru: {
+      verb: "обращать внимание",
+      meaning: "обращать внимание на",
+      sentence: "Обрати внимание на движение."
+    },
+    uk: {
+      verb: "звертати увагу",
+      meaning: "звертати увагу на",
+      sentence: "Зверни увагу на дорожній рух."
+    },
+    tr: {
+      verb: "dikkat etmek",
+      meaning: "bir şeye dikkat etmek",
+      sentence: "Trafiğe dikkat et."
+    }
+  },
+  "warten-auf-akk": {
+    en: { verb: "to wait", meaning: "to wait for", sentence: "I am waiting for the bus." },
+    ru: { verb: "ждать", meaning: "ждать чего-либо", sentence: "Я жду автобус." },
+    uk: { verb: "чекати", meaning: "чекати на щось", sentence: "Я чекаю на автобус." },
+    tr: { verb: "beklemek", meaning: "bir şeyi beklemek", sentence: "Otobüsü bekliyorum." }
+  },
+  "sich-freuen-auf-akk": {
+    en: {
+      verb: "to look forward to",
+      meaning: "to look forward to",
+      sentence: "I am looking forward to the vacation."
+    },
+    ru: {
+      verb: "с нетерпением ждать",
+      meaning: "с нетерпением ждать чего-либо",
+      sentence: "Я с нетерпением жду отпуска."
+    },
+    uk: {
+      verb: "з нетерпінням чекати",
+      meaning: "з нетерпінням чекати на щось",
+      sentence: "Я з нетерпінням чекаю на відпустку."
+    },
+    tr: {
+      verb: "dört gözle beklemek",
+      meaning: "bir şeyi dört gözle beklemek",
+      sentence: "Tatili dört gözle bekliyorum."
+    }
+  },
+  "sich-vorbereiten-auf-akk": {
+    en: { verb: "to prepare", meaning: "to prepare for", sentence: "I am preparing for the exam." },
+    ru: { verb: "готовиться", meaning: "готовиться к", sentence: "Я готовлюсь к экзамену." },
+    uk: { verb: "готуватися", meaning: "готуватися до", sentence: "Я готуюся до іспиту." },
+    tr: { verb: "hazırlanmak", meaning: "bir şeye hazırlanmak", sentence: "Sınava hazırlanıyorum." }
+  },
+  "denken-an-akk": {
+    en: { verb: "to think", meaning: "to think of/about", sentence: "Are you thinking about the appointment?" },
+    ru: { verb: "думать", meaning: "думать о", sentence: "Ты думаешь о встрече?" },
+    uk: { verb: "думати", meaning: "думати про", sentence: "Ти думаєш про зустріч?" },
+    tr: { verb: "düşünmek", meaning: "bir şeyi düşünmek", sentence: "Randevuyu düşünüyor musun?" }
+  },
+  "glauben-an-akk": {
+    en: { verb: "to believe", meaning: "to believe in", sentence: "We believe in success." },
+    ru: { verb: "верить", meaning: "верить в", sentence: "Мы верим в успех." },
+    uk: { verb: "вірити", meaning: "вірити в", sentence: "Ми віримо в успіх." },
+    tr: { verb: "inanmak", meaning: "bir şeye inanmak", sentence: "Başarıya inanıyoruz." }
+  },
+  "danken-fuer-akk": {
+    en: { verb: "to thank", meaning: "to thank for", sentence: "I thank you for the hint." },
+    ru: { verb: "благодарить", meaning: "благодарить за", sentence: "Я благодарю тебя за подсказку." },
+    uk: { verb: "дякувати", meaning: "дякувати за", sentence: "Я дякую тобі за підказку." },
+    tr: { verb: "teşekkür etmek", meaning: "bir şey için teşekkür etmek", sentence: "İpucu için sana teşekkür ederim." }
+  },
+  "sich-entscheiden-fuer-akk": {
+    en: { verb: "to decide", meaning: "to decide on", sentence: "He decides on the course." },
+    ru: { verb: "выбирать", meaning: "выбрать что-либо", sentence: "Он выбирает курс." },
+    uk: { verb: "обирати", meaning: "обрати щось", sentence: "Він обирає курс." },
+    tr: { verb: "karar vermek", meaning: "bir şeye karar vermek", sentence: "Kursa karar veriyor." }
+  },
+  "sich-interessieren-fuer-akk": {
+    en: { verb: "to be interested", meaning: "to be interested in", sentence: "Lina is interested in the film." },
+    ru: { verb: "интересоваться", meaning: "интересоваться чем-либо", sentence: "Лина интересуется фильмом." },
+    uk: { verb: "цікавитися", meaning: "цікавитися чимось", sentence: "Ліна цікавиться фільмом." },
+    tr: { verb: "ilgilenmek", meaning: "bir şeyle ilgilenmek", sentence: "Lina filmle ilgileniyor." }
+  },
+  "sprechen-mit-dat": {
+    en: { verb: "to speak", meaning: "to speak with", sentence: "I am speaking with my teacher." },
+    ru: { verb: "говорить", meaning: "говорить с", sentence: "Я говорю с моим учителем." },
+    uk: { verb: "говорити", meaning: "говорити з", sentence: "Я говорю зі своїм учителем." },
+    tr: { verb: "konuşmak", meaning: "biriyle konuşmak", sentence: "Öğretmenimle konuşuyorum." }
+  },
+  "sich-beschaeftigen-mit-dat": {
+    en: { verb: "to deal with", meaning: "to deal with", sentence: "She is dealing with the task." },
+    ru: { verb: "заниматься", meaning: "заниматься чем-либо", sentence: "Она занимается задачей." },
+    uk: { verb: "займатися", meaning: "займатися чимось", sentence: "Вона займається завданням." },
+    tr: { verb: "uğraşmak", meaning: "bir şeyle uğraşmak", sentence: "Görevle uğraşıyor." }
+  },
+  "teilnehmen-an-dat": {
+    en: { verb: "to participate", meaning: "to participate in", sentence: "He participates in the course." },
+    ru: { verb: "участвовать", meaning: "участвовать в", sentence: "Он участвует в курсе." },
+    uk: { verb: "брати участь", meaning: "брати участь у", sentence: "Він бере участь у курсі." },
+    tr: { verb: "katılmak", meaning: "bir şeye katılmak", sentence: "Kursa katılıyor." }
+  },
+  "sich-beschweren-ueber-akk": {
+    en: { verb: "to complain", meaning: "to complain about", sentence: "The customer complains about the noise." },
+    ru: { verb: "жаловаться", meaning: "жаловаться на", sentence: "Клиент жалуется на шум." },
+    uk: { verb: "скаржитися", meaning: "скаржитися на", sentence: "Клієнт скаржиться на шум." },
+    tr: { verb: "şikayet etmek", meaning: "bir şeyden şikayet etmek", sentence: "Müşteri gürültüden şikayet ediyor." }
+  },
+  "traeumen-von-dat": {
+    en: { verb: "to dream", meaning: "to dream of", sentence: "I dream of a house by the sea." },
+    ru: { verb: "мечтать", meaning: "мечтать о", sentence: "Я мечтаю о доме у моря." },
+    uk: { verb: "мріяти", meaning: "мріяти про", sentence: "Я мрію про будинок біля моря." },
+    tr: { verb: "hayal etmek", meaning: "bir şeyin hayalini kurmak", sentence: "Deniz kıyısında bir ev hayal ediyorum." }
+  },
+  "abhaengen-von-dat": {
+    en: { verb: "to depend", meaning: "to depend on", sentence: "That depends on your decision." },
+    ru: { verb: "зависеть", meaning: "зависеть от", sentence: "Это зависит от твоего решения." },
+    uk: { verb: "залежати", meaning: "залежати від", sentence: "Це залежить від твого рішення." },
+    tr: { verb: "bağlı olmak", meaning: "bir şeye bağlı olmak", sentence: "Bu senin kararına bağlı." }
+  },
+  "sich-kuemmern-um-akk": {
+    en: { verb: "to take care", meaning: "to take care of", sentence: "She takes care of the registration." },
+    ru: { verb: "заниматься", meaning: "заниматься чем-либо", sentence: "Она занимается регистрацией." },
+    uk: { verb: "займатися", meaning: "займатися чимось", sentence: "Вона займається реєстрацією." },
+    tr: { verb: "ilgilenmek", meaning: "bir şeyle ilgilenmek", sentence: "Kayıtla ilgileniyor." }
+  },
+  "sich-verlieben-in-akk": {
+    en: { verb: "to fall in love", meaning: "to fall in love with", sentence: "She falls in love with the neighbor." },
+    ru: { verb: "влюбляться", meaning: "влюбляться в", sentence: "Она влюбляется в соседа." },
+    uk: { verb: "закохуватися", meaning: "закохуватися в", sentence: "Вона закохується в сусіда." },
+    tr: { verb: "aşık olmak", meaning: "birine aşık olmak", sentence: "Komşusuna aşık oluyor." }
+  },
+  "sprechen-ueber-akk": {
+    en: { verb: "to talk", meaning: "to talk about", sentence: "We are talking about the weather." },
+    ru: { verb: "говорить", meaning: "говорить о", sentence: "Мы говорим о погоде." },
+    uk: { verb: "говорити", meaning: "говорити про", sentence: "Ми говоримо про погоду." },
+    tr: { verb: "konuşmak", meaning: "bir şey hakkında konuşmak", sentence: "Hava durumu hakkında konuşuyoruz." }
+  },
+  "sich-freuen-ueber-akk": {
+    en: { verb: "to be happy", meaning: "to be happy about", sentence: "She is happy about the gift." },
+    ru: { verb: "радоваться", meaning: "радоваться чему-либо", sentence: "Она рада подарку." },
+    uk: { verb: "радіти", meaning: "радіти чомусь", sentence: "Вона рада подарунку." },
+    tr: { verb: "sevinmek", meaning: "bir şeye sevinmek", sentence: "Hediyeye seviniyor." }
+  }
+};
+
 const elements = {
   streak: document.querySelector("#streakValue"),
   accuracy: document.querySelector("#accuracyValue"),
@@ -1358,6 +1515,7 @@ const elements = {
   metaGrid: document.querySelector("#metaGrid"),
   promptText: document.querySelector("#promptText"),
   answerGrid: document.querySelector("#answerGrid"),
+  translationPanel: document.querySelector("#translationPanel"),
   feedbackBox: document.querySelector("#feedbackBox"),
   resetButton: document.querySelector("#resetButton"),
   submitButton: document.querySelector("#submitButton"),
@@ -1371,6 +1529,7 @@ const elements = {
   verbListBlock: document.querySelector("#verbListBlock"),
   verbListCount: document.querySelector("#verbListCount"),
   verbListToggle: document.querySelector("#verbListToggle"),
+  translationLanguage: document.querySelector("#translationLanguage"),
   verbSearchInput: document.querySelector("#verbSearchInput"),
   selectedVerbList: document.querySelector("#selectedVerbList"),
   verbBulkAdd: document.querySelector("#verbBulkAdd"),
@@ -1386,6 +1545,7 @@ const appState = {
   verbMode: "prep",
   verbSearch: "",
   verbBulkStatus: "",
+  translationLanguage: loadTranslationLanguage(),
   reviewOnly: false,
   current: null,
   selected: "",
@@ -1449,6 +1609,39 @@ function saveTrainingList() {
   appState.trainingList.useVerbList =
     Boolean(appState.trainingList.useVerbList) && appState.trainingList.verbs.length > 0;
   localStorage.setItem(TRAINING_LIST_KEY, JSON.stringify(appState.trainingList));
+}
+
+function loadTranslationLanguage() {
+  const saved = localStorage.getItem(TRANSLATION_LANGUAGE_KEY);
+  return Object.prototype.hasOwnProperty.call(TRANSLATION_LANGUAGES, saved) ? saved : "en";
+}
+
+function saveTranslationLanguage() {
+  localStorage.setItem(TRANSLATION_LANGUAGE_KEY, appState.translationLanguage);
+}
+
+function completedVerbSentence(item) {
+  return item.sentence.replace("___", item.prep);
+}
+
+function verbTranslationFor(item) {
+  const language = Object.prototype.hasOwnProperty.call(
+    TRANSLATION_LANGUAGES,
+    appState.translationLanguage
+  )
+    ? appState.translationLanguage
+    : "en";
+  const base = {
+    language,
+    languageLabel: TRANSLATION_LANGUAGES[language],
+    verb: item.verb,
+    meaning: item.meaning,
+    sentence: language === "en" ? completedVerbSentence(item) : "Translation coming soon."
+  };
+  return {
+    ...base,
+    ...(VERB_TRANSLATIONS[item.id]?.[language] || VERB_TRANSLATIONS[item.id]?.en || {})
+  };
 }
 
 function sanitizeVerbIds(ids) {
@@ -1673,6 +1866,21 @@ function clearVerbTrainingList() {
   refreshAfterTrainingListChange(wasActive);
 }
 
+function refreshCurrentVerbTranslation() {
+  if (appState.topic !== "verbs" || !appState.current?.verbItemId) {
+    return;
+  }
+  const item = VERB_LOOKUP.get(appState.current.verbItemId);
+  if (!item) {
+    return;
+  }
+  const translation = verbTranslationFor(item);
+  appState.current.translation = translation;
+  appState.current.meta = appState.current.meta.map(([label, value]) =>
+    label === "Meaning" ? [label, translation.meaning] : [label, value]
+  );
+}
+
 function refreshAfterTrainingListChange(advance) {
   if (advance && appState.topic === "verbs" && !appState.reviewOnly) {
     nextExercise();
@@ -1715,6 +1923,7 @@ function mistakeSignature(exercise) {
 function exerciseSnapshot(exercise) {
   return {
     topic: exercise.topic,
+    verbItemId: exercise.verbItemId,
     id: exercise.id,
     title: exercise.title,
     prompt: exercise.prompt,
@@ -1726,12 +1935,20 @@ function exerciseSnapshot(exercise) {
 }
 
 function exerciseFromMistake(miss) {
-  return {
+  const exercise = {
     ...miss.exercise,
     options: [...miss.exercise.options],
     meta: [["Review", miss.resolved ? "Mistake history" : "Active mistake"], ...miss.exercise.meta],
     reviewSignature: miss.signature
   };
+  if (exercise.verbItemId && VERB_LOOKUP.has(exercise.verbItemId)) {
+    const translation = verbTranslationFor(VERB_LOOKUP.get(exercise.verbItemId));
+    exercise.translation = translation;
+    exercise.meta = exercise.meta.map(([label, value]) =>
+      label === "Meaning" ? [label, translation.meaning] : [label, value]
+    );
+  }
+  return exercise;
 }
 
 function recordMistake(exercise, selected) {
@@ -1944,10 +2161,12 @@ function buildAdjectiveExercise() {
 function buildVerbExercise() {
   const item = weightedPick(activeVerbItems());
   const mode = appState.verbMode;
+  const translation = verbTranslationFor(item);
 
   if (mode === "case") {
     return {
       topic: "verbs",
+      verbItemId: item.id,
       id: `verb-case:${item.id}`,
       title: "Case after preposition",
       prompt: item.sentence.replace("___", item.prep),
@@ -1956,9 +2175,10 @@ function buildVerbExercise() {
       meta: [
         ["Verb", item.verb],
         ["Preposition", item.prep],
-        ["Meaning", item.meaning],
+        ["Meaning", translation.meaning],
         ["Focus", "Case"]
       ],
+      translation,
       explanation: item.pattern
     };
   }
@@ -1969,6 +2189,7 @@ function buildVerbExercise() {
 
     return {
       topic: "verbs",
+      verbItemId: item.id,
       id: `verb-pattern:${item.id}`,
       title: "Full verb pattern",
       prompt: item.sentence.replace("___", item.prep),
@@ -1976,10 +2197,11 @@ function buildVerbExercise() {
       options: shuffle([item.pattern, ...distractors]),
       meta: [
         ["Verb", item.verb],
-        ["Meaning", item.meaning],
+        ["Meaning", translation.meaning],
         ["Focus", "Full pattern"],
         ["Sentence", "Preposition shown"]
       ],
+      translation,
       explanation: item.pattern
     };
   }
@@ -1988,6 +2210,7 @@ function buildVerbExercise() {
 
   return {
     topic: "verbs",
+    verbItemId: item.id,
     id: `verb-prep:${item.id}`,
     title: "Missing preposition",
     prompt: item.sentence,
@@ -1996,9 +2219,10 @@ function buildVerbExercise() {
     meta: [
       ["Verb", item.verb],
       ["Case", CASES[item.caseKey]],
-      ["Meaning", item.meaning],
+      ["Meaning", translation.meaning],
       ["Focus", "Preposition"]
     ],
+    translation,
     explanation: item.pattern
   };
 }
@@ -2177,15 +2401,54 @@ function renderQuestion() {
         return;
       }
       appState.selected = option;
-      renderQuestion();
-      elements.feedbackBox.textContent = "";
-      elements.feedbackBox.className = "feedback";
+      if (appState.topic === "verbs") {
+        submitAnswer();
+      } else {
+        renderQuestion();
+        elements.feedbackBox.textContent = "";
+        elements.feedbackBox.className = "feedback";
+      }
     });
     elements.answerGrid.append(button);
   });
 
-  elements.submitButton.classList.toggle("hidden", appState.answered);
+  renderTranslationPanel(exercise);
+  renderQuestionActions();
+}
+
+function renderTranslationPanel(exercise) {
+  elements.translationPanel.replaceChildren();
+  elements.translationPanel.classList.toggle("hidden", !exercise.translation);
+  if (!exercise.translation) {
+    return;
+  }
+
+  [
+    ["Language", exercise.translation.languageLabel],
+    ["Verb", `${exercise.meta.find(([label]) => label === "Verb")?.[1] || ""} = ${exercise.translation.verb}`],
+    ["Meaning", exercise.translation.meaning],
+    ["Example", exercise.translation.sentence]
+  ].forEach(([label, value]) => {
+    const row = document.createElement("div");
+    row.className = "translation-row";
+    const labelEl = document.createElement("span");
+    labelEl.textContent = label;
+    const valueEl = document.createElement("strong");
+    valueEl.textContent = value;
+    row.append(labelEl, valueEl);
+    elements.translationPanel.append(row);
+  });
+}
+
+function renderQuestionActions() {
+  const isVerbTopic = appState.topic === "verbs";
+  elements.submitButton.classList.toggle("hidden", isVerbTopic || appState.answered);
+  elements.resetButton.classList.toggle("hidden", isVerbTopic);
   elements.nextButton.classList.toggle("hidden", !appState.answered);
+  elements.submitButton.disabled = isVerbTopic;
+  elements.resetButton.disabled = isVerbTopic;
+  elements.nextButton.disabled = false;
+  elements.nextButton.parentElement?.classList.toggle("verb-actions", isVerbTopic);
 }
 
 function renderTopicStats() {
@@ -2245,6 +2508,7 @@ function renderVerbTrainingList() {
   elements.verbListToggle.checked = isVerbListActive();
   elements.verbListToggle.disabled = !selectedIds.length;
   elements.verbListClear.disabled = !selectedIds.length;
+  elements.translationLanguage.value = appState.translationLanguage;
   const bulk = bulkVerbSummary();
   const newBulkItems = bulk.items.filter((item) => !selectedSet.has(item.id)).length;
   elements.verbBulkAdd.disabled = !bulk.items.length;
@@ -2392,6 +2656,17 @@ elements.verbSearchInput.addEventListener("input", (event) => {
 elements.verbBulkAdd.addEventListener("click", addBulkVerbMatches);
 elements.verbListToggle.addEventListener("change", (event) => {
   setVerbListEnabled(event.target.checked);
+});
+elements.translationLanguage.addEventListener("change", (event) => {
+  appState.translationLanguage = Object.prototype.hasOwnProperty.call(
+    TRANSLATION_LANGUAGES,
+    event.target.value
+  )
+    ? event.target.value
+    : "en";
+  saveTranslationLanguage();
+  refreshCurrentVerbTranslation();
+  render();
 });
 elements.verbListClear.addEventListener("click", clearVerbTrainingList);
 

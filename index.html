@@ -58,6 +58,7 @@
             <div class="meta-grid" id="metaGrid"></div>
             <p class="prompt" id="promptText"></p>
             <div class="answer-grid" id="answerGrid"></div>
+            <div class="translation-panel hidden" id="translationPanel"></div>
           </article>
 
           <div class="feedback-row">
@@ -104,6 +105,15 @@
               <input type="checkbox" id="verbListToggle">
               <span>Train selected</span>
             </label>
+            <div class="select-field">
+              <label for="translationLanguage">Translation</label>
+              <select id="translationLanguage">
+                <option value="en">English</option>
+                <option value="ru">Русский</option>
+                <option value="uk">Українська</option>
+                <option value="tr">Türkçe</option>
+              </select>
+            </div>
             <div class="search-field">
               <label for="verbSearchInput">Search</label>
               <textarea

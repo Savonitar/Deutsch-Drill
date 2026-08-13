@@ -20,6 +20,8 @@ Progress is stored locally in the browser with `localStorage`.
 - Verb preposition-case questions
 - Full verb-pattern recognition, such as `warten auf + Akkusativ`
 - Custom verb training lists with search, bulk paste, and selected-only practice
+- Immediate answer scoring for verb practice
+- Verb translations in English, Russian, Ukrainian, and Turkish for the starter set
 - Mistake-history review for repeated practice
 
 ## Checks

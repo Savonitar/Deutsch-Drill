@@ -94,6 +94,7 @@ const localStorage = {
 const context = vm.createContext({
   assert,
   document,
+  elementMap: elements,
   localStorage,
   window: { confirm: () => true },
   console,
@@ -178,6 +179,52 @@ vm.runInContext(`${app}
       "Answer missing from verb options: " + mode
     );
   }
+
+  appState.topic = "adjective";
+  appState.adjMode = "form";
+  appState.reviewOnly = false;
+  nextExercise();
+  const adjectiveTotal = appState.progress.total;
+  const adjectiveChoice = elementMap
+    .get("#answerGrid")
+    .children.find((button) => button.textContent === appState.current.answer);
+  adjectiveChoice.listeners.click();
+  assert(!appState.answered, "Adjective choices should still wait for Check");
+  assert(appState.progress.total === adjectiveTotal, "Adjective click should not count immediately");
+
+  appState.topic = "verbs";
+  appState.verbMode = "prep";
+  appState.trainingList.verbs = ["warten-auf-akk"];
+  appState.trainingList.useVerbList = true;
+  appState.reviewOnly = false;
+  nextExercise();
+  const verbTotal = appState.progress.total;
+  const verbChoice = elementMap
+    .get("#answerGrid")
+    .children.find((button) => button.textContent === appState.current.answer);
+  verbChoice.listeners.click();
+  assert(appState.answered, "Verb choices should submit immediately");
+  assert(appState.progress.total === verbTotal + 1, "Verb click should count the answer");
+
+  appState.topic = "verbs";
+  appState.verbMode = "prep";
+  appState.translationLanguage = "ru";
+  appState.trainingList.verbs = ["warten-auf-akk"];
+  appState.trainingList.useVerbList = true;
+  appState.reviewOnly = false;
+  nextExercise();
+  assert(appState.current.translation.meaning === "ждать чего-либо", "Russian meaning should render");
+  assert(appState.current.translation.sentence === "Я жду автобус.", "Russian sentence should render");
+  assert(
+    appState.current.meta.some(([label, value]) => label === "Meaning" && value === "ждать чего-либо"),
+    "Verb meta should use the selected translation language"
+  );
+  appState.translationLanguage = "tr";
+  refreshCurrentVerbTranslation();
+  assert(
+    appState.current.translation.sentence === "Otobüsü bekliyorum.",
+    "Language changes should refresh the current translation"
+  );
 
   appState.verbSearch = "kuemmern um";
   assert(
