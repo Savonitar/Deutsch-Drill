@@ -1,7 +1,9 @@
 const fs = require("fs");
 const vm = require("vm");
 
-const app = fs.readFileSync("app.js", "utf8");
+const dataScripts = ["data/verbs.js", "data/translations.js", "app.js"];
+const app = dataScripts.map((file) => fs.readFileSync(file, "utf8")).join("\n\n");
+const index = fs.readFileSync("index.html", "utf8");
 
 class ClassList {
   constructor() {
@@ -54,6 +56,18 @@ function assert(condition, message) {
     throw new Error(message);
   }
 }
+
+const verbDataScriptIndex = index.indexOf('src="data/verbs.js"');
+const translationDataScriptIndex = index.indexOf('src="data/translations.js"');
+const appScriptIndex = index.indexOf('src="app.js"');
+assert(
+  verbDataScriptIndex >= 0 &&
+    translationDataScriptIndex >= 0 &&
+    appScriptIndex >= 0 &&
+    verbDataScriptIndex < translationDataScriptIndex &&
+    translationDataScriptIndex < appScriptIndex,
+  "Data scripts should load before app.js"
+);
 
 const elements = new Map();
 const topicButtons = ["adjective", "verbs"].map((topic) => {
@@ -143,9 +157,25 @@ vm.runInContext(`${app}
     assert(!verbIds.has(item.id), "Duplicate verb id: " + item.id);
     verbIds.add(item.id);
     assert(
-      (item.sentence.match(/___/g) || []).length === 1,
-      "Sentence must contain exactly one blank: " + item.id
+      !Object.prototype.hasOwnProperty.call(item, "meaning"),
+      "Verb data should not store translations: " + item.id
     );
+    assert(VERB_TRANSLATIONS[item.id]?.en?.meaning, "Missing English meaning: " + item.id);
+    const verbSentences = verbSentencesFor(item);
+    assert(
+      verbSentences.length >= 3,
+      "Verb item should include generated sentence variants: " + item.id
+    );
+    assert(
+      verbSentences[0] === item.sentence,
+      "First sentence variant should match sentence: " + item.id
+    );
+    for (const sentence of verbSentences) {
+      assert(
+        (sentence.match(/___/g) || []).length === 1,
+        "Sentence must contain exactly one blank: " + item.id
+      );
+    }
     assert(item.pattern.includes(item.prep), "Pattern does not include preposition: " + item.id);
     assert(
       item.pattern.includes(CASES[item.caseKey]),
@@ -235,6 +265,11 @@ vm.runInContext(`${app}
   assert(
     matchingVerbItems().some((item) => item.id === "sich-beschweren-ueber-akk"),
     "Search should match accented prepositions"
+  );
+  appState.verbSearch = "Gegenverkehr";
+  assert(
+    matchingVerbItems().some((item) => item.id === "achten-auf-akk"),
+    "Search should match generated sentence variants"
   );
 
   appState.verbSearch = [
