@@ -1,0 +1,108 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta
+      name="description"
+      content="Static German practice for adjective declension and verbs with prepositions."
+    >
+    <title>Deutsch Drill</title>
+    <link rel="stylesheet" href="styles.css">
+  </head>
+  <body>
+    <main class="app-shell">
+      <header class="topbar">
+        <div class="brand-block">
+          <span class="eyebrow">German practice</span>
+          <h1>Deutsch Drill</h1>
+        </div>
+        <div class="score-strip" aria-label="Current progress">
+          <div>
+            <span class="score-label">Streak</span>
+            <strong id="streakValue">0</strong>
+          </div>
+          <div>
+            <span class="score-label">Accuracy</span>
+            <strong id="accuracyValue">0%</strong>
+          </div>
+          <div>
+            <span class="score-label">Done</span>
+            <strong id="totalValue">0</strong>
+          </div>
+        </div>
+      </header>
+
+      <nav class="topic-tabs" aria-label="Training topic">
+        <button class="tab-button active" type="button" data-topic="adjective">
+          Adjektivdeklination
+        </button>
+        <button class="tab-button" type="button" data-topic="verbs">
+          Verben mit Präpositionen
+        </button>
+      </nav>
+
+      <section class="workspace">
+        <section class="trainer-panel" aria-labelledby="topicTitle">
+          <div class="trainer-head">
+            <div>
+              <span class="topic-kicker" id="topicKicker">Cases, gender, article type</span>
+              <h2 id="topicTitle">Adjective ending</h2>
+            </div>
+            <div class="pill" id="dataBadge">Static examples</div>
+          </div>
+
+          <div class="controls-row" id="controlsRow"></div>
+
+          <article class="question-box" aria-live="polite">
+            <div class="meta-grid" id="metaGrid"></div>
+            <p class="prompt" id="promptText"></p>
+            <div class="answer-grid" id="answerGrid"></div>
+          </article>
+
+          <div class="feedback-row">
+            <div class="feedback" id="feedbackBox" aria-live="polite"></div>
+            <div class="actions">
+              <button class="ghost-button" type="button" id="resetButton">Reset</button>
+              <button class="primary-button" type="button" id="submitButton">Check</button>
+              <button class="primary-button hidden" type="button" id="nextButton">Next</button>
+            </div>
+          </div>
+        </section>
+
+        <aside class="side-panel" aria-label="Session details">
+          <section class="stat-block">
+            <h3>Session</h3>
+            <div class="meter">
+              <span id="topicAccuracyLabel">0% topic accuracy</span>
+              <div class="meter-track">
+                <div class="meter-fill" id="topicMeter"></div>
+              </div>
+            </div>
+            <dl class="mini-stats">
+              <div>
+                <dt>Correct</dt>
+                <dd id="topicCorrect">0</dd>
+              </div>
+              <div>
+                <dt>Missed</dt>
+                <dd id="topicMissed">0</dd>
+              </div>
+              <div>
+                <dt>Best streak</dt>
+                <dd id="bestStreak">0</dd>
+              </div>
+            </dl>
+          </section>
+
+          <section class="stat-block">
+            <h3>Recent misses</h3>
+            <ol class="miss-list" id="missList"></ol>
+          </section>
+        </aside>
+      </section>
+    </main>
+
+    <script src="app.js" defer></script>
+  </body>
+</html>
