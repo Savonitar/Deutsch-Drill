@@ -384,963 +384,6 @@ const STRONG_SINGULAR_NOUNS = [
   }
 ];
 
-const VERB_ITEMS = [
-  {
-    id: "achten-auf-akk",
-    verb: "achten",
-    prep: "auf",
-    caseKey: "akk",
-    sentence: "Achte ___ den Verkehr.",
-    pattern: "achten auf + Akkusativ",
-    meaning: "to pay attention to"
-  },
-  {
-    id: "warten-auf-akk",
-    verb: "warten",
-    prep: "auf",
-    caseKey: "akk",
-    sentence: "Ich warte ___ den Bus.",
-    pattern: "warten auf + Akkusativ",
-    meaning: "to wait for"
-  },
-  {
-    id: "antworten-auf-akk",
-    verb: "antworten",
-    prep: "auf",
-    caseKey: "akk",
-    sentence: "Ich antworte ___ die Nachricht.",
-    pattern: "antworten auf + Akkusativ",
-    meaning: "to answer/respond to"
-  },
-  {
-    id: "bestehen-auf-dat",
-    verb: "bestehen",
-    prep: "auf",
-    caseKey: "dat",
-    sentence: "Ich bestehe ___ einer Erklärung.",
-    pattern: "bestehen auf + Dativ",
-    meaning: "to insist on"
-  },
-  {
-    id: "hoffen-auf-akk",
-    verb: "hoffen",
-    prep: "auf",
-    caseKey: "akk",
-    sentence: "Wir hoffen ___ den Erfolg.",
-    pattern: "hoffen auf + Akkusativ",
-    meaning: "to hope for"
-  },
-  {
-    id: "reagieren-auf-akk",
-    verb: "reagieren",
-    prep: "auf",
-    caseKey: "akk",
-    sentence: "Wie reagierst du ___ den Vorschlag?",
-    pattern: "reagieren auf + Akkusativ",
-    meaning: "to react to"
-  },
-  {
-    id: "sich-freuen-auf-akk",
-    verb: "sich freuen",
-    prep: "auf",
-    caseKey: "akk",
-    sentence: "Ich freue mich ___ den Urlaub.",
-    pattern: "sich freuen auf + Akkusativ",
-    meaning: "to look forward to"
-  },
-  {
-    id: "sich-konzentrieren-auf-akk",
-    verb: "sich konzentrieren",
-    prep: "auf",
-    caseKey: "akk",
-    sentence: "Sie konzentriert sich ___ die Aufgabe.",
-    pattern: "sich konzentrieren auf + Akkusativ",
-    meaning: "to concentrate on"
-  },
-  {
-    id: "sich-verlassen-auf-akk",
-    verb: "sich verlassen",
-    prep: "auf",
-    caseKey: "akk",
-    sentence: "Ich verlasse mich ___ den Plan.",
-    pattern: "sich verlassen auf + Akkusativ",
-    meaning: "to rely on"
-  },
-  {
-    id: "sich-vorbereiten-auf-akk",
-    verb: "sich vorbereiten",
-    prep: "auf",
-    caseKey: "akk",
-    sentence: "Ich bereite mich ___ die Prüfung vor.",
-    pattern: "sich vorbereiten auf + Akkusativ",
-    meaning: "to prepare for"
-  },
-  {
-    id: "verzichten-auf-akk",
-    verb: "verzichten",
-    prep: "auf",
-    caseKey: "akk",
-    sentence: "Ich verzichte ___ den Nachtisch.",
-    pattern: "verzichten auf + Akkusativ",
-    meaning: "to do without"
-  },
-  {
-    id: "arbeiten-an-dat",
-    verb: "arbeiten",
-    prep: "an",
-    caseKey: "dat",
-    sentence: "Ich arbeite ___ dem Projekt.",
-    pattern: "arbeiten an + Dativ",
-    meaning: "to work on"
-  },
-  {
-    id: "denken-an-akk",
-    verb: "denken",
-    prep: "an",
-    caseKey: "akk",
-    sentence: "Denkst du ___ den Termin?",
-    pattern: "denken an + Akkusativ",
-    meaning: "to think of/about"
-  },
-  {
-    id: "glauben-an-akk",
-    verb: "glauben",
-    prep: "an",
-    caseKey: "akk",
-    sentence: "Wir glauben ___ den Erfolg.",
-    pattern: "glauben an + Akkusativ",
-    meaning: "to believe in"
-  },
-  {
-    id: "leiden-an-dat",
-    verb: "leiden",
-    prep: "an",
-    caseKey: "dat",
-    sentence: "Er leidet ___ einer Krankheit.",
-    pattern: "leiden an + Dativ",
-    meaning: "to suffer from"
-  },
-  {
-    id: "erkennen-an-dat",
-    verb: "erkennen",
-    prep: "an",
-    caseKey: "dat",
-    sentence: "Ich erkenne ihn ___ seiner Stimme.",
-    pattern: "erkennen an + Dativ",
-    meaning: "to recognize by"
-  },
-  {
-    id: "schreiben-an-akk",
-    verb: "schreiben",
-    prep: "an",
-    caseKey: "akk",
-    sentence: "Sie schreibt ___ den Kunden.",
-    pattern: "schreiben an + Akkusativ",
-    meaning: "to write to"
-  },
-  {
-    id: "sich-beteiligen-an-dat",
-    verb: "sich beteiligen",
-    prep: "an",
-    caseKey: "dat",
-    sentence: "Sie beteiligt sich ___ dem Gespräch.",
-    pattern: "sich beteiligen an + Dativ",
-    meaning: "to take part in"
-  },
-  {
-    id: "sich-erinnern-an-akk",
-    verb: "sich erinnern",
-    prep: "an",
-    caseKey: "akk",
-    sentence: "Er erinnert sich ___ den Namen.",
-    pattern: "sich erinnern an + Akkusativ",
-    meaning: "to remember"
-  },
-  {
-    id: "sich-gewoehnen-an-akk",
-    verb: "sich gewöhnen",
-    prep: "an",
-    caseKey: "akk",
-    sentence: "Ich gewöhne mich ___ den Verkehr.",
-    pattern: "sich gewöhnen an + Akkusativ",
-    meaning: "to get used to"
-  },
-  {
-    id: "sich-halten-an-akk",
-    verb: "sich halten",
-    prep: "an",
-    caseKey: "akk",
-    sentence: "Halte dich ___ den Plan.",
-    pattern: "sich halten an + Akkusativ",
-    meaning: "to stick to/follow"
-  },
-  {
-    id: "sich-binden-an-akk",
-    verb: "sich binden",
-    prep: "an",
-    caseKey: "akk",
-    sentence: "Er bindet sich nicht gern ___ einen Vertrag.",
-    pattern: "sich binden an + Akkusativ",
-    meaning: "to commit oneself to"
-  },
-  {
-    id: "sich-orientieren-an-dat",
-    verb: "sich orientieren",
-    prep: "an",
-    caseKey: "dat",
-    sentence: "Wir orientieren uns ___ dem Beispiel.",
-    pattern: "sich orientieren an + Dativ",
-    meaning: "to orient oneself by"
-  },
-  {
-    id: "sich-wenden-an-akk",
-    verb: "sich wenden",
-    prep: "an",
-    caseKey: "akk",
-    sentence: "Wenden Sie sich ___ den Empfang.",
-    pattern: "sich wenden an + Akkusativ",
-    meaning: "to contact/turn to"
-  },
-  {
-    id: "teilnehmen-an-dat",
-    verb: "teilnehmen",
-    prep: "an",
-    caseKey: "dat",
-    sentence: "Er nimmt ___ dem Kurs teil.",
-    pattern: "teilnehmen an + Dativ",
-    meaning: "to participate in"
-  },
-  {
-    id: "sterben-an-dat",
-    verb: "sterben",
-    prep: "an",
-    caseKey: "dat",
-    sentence: "Er ist ___ einer Krankheit gestorben.",
-    pattern: "sterben an + Dativ",
-    meaning: "to die of/from"
-  },
-  {
-    id: "liegen-an-dat",
-    verb: "liegen",
-    prep: "an",
-    caseKey: "dat",
-    sentence: "Es liegt ___ deinem Verhalten.",
-    pattern: "liegen an + Dativ",
-    meaning: "to be due to"
-  },
-  {
-    id: "schuld-sein-an-dat",
-    verb: "schuld sein",
-    prep: "an",
-    caseKey: "dat",
-    sentence: "Er ist schuld ___ dem Unfall.",
-    pattern: "schuld sein an + Dativ",
-    meaning: "to be responsible for"
-  },
-  {
-    id: "zweifeln-an-dat",
-    verb: "zweifeln",
-    prep: "an",
-    caseKey: "dat",
-    sentence: "Sie zweifelt ___ der Lösung.",
-    pattern: "zweifeln an + Dativ",
-    meaning: "to doubt"
-  },
-  {
-    id: "sich-entschuldigen-bei-dat",
-    verb: "sich entschuldigen",
-    prep: "bei",
-    caseKey: "dat",
-    sentence: "Ich entschuldige mich ___ dem Nachbarn.",
-    pattern: "sich entschuldigen bei + Dativ",
-    meaning: "to apologize to"
-  },
-  {
-    id: "helfen-bei-dat",
-    verb: "helfen",
-    prep: "bei",
-    caseKey: "dat",
-    sentence: "Ich helfe dir ___ der Aufgabe.",
-    pattern: "helfen bei + Dativ",
-    meaning: "to help with"
-  },
-  {
-    id: "wohnen-bei-dat",
-    verb: "wohnen",
-    prep: "bei",
-    caseKey: "dat",
-    sentence: "Wir wohnen ___ meinem Bruder.",
-    pattern: "wohnen bei + Dativ",
-    meaning: "to stay/live at someone's place"
-  },
-  {
-    id: "kaempfen-fuer-akk",
-    verb: "kämpfen",
-    prep: "für",
-    caseKey: "akk",
-    sentence: "Wir kämpfen ___ die Freiheit.",
-    pattern: "kämpfen für + Akkusativ",
-    meaning: "to fight for"
-  },
-  {
-    id: "danken-fuer-akk",
-    verb: "danken",
-    prep: "für",
-    caseKey: "akk",
-    sentence: "Ich danke dir ___ den Hinweis.",
-    pattern: "danken für + Akkusativ",
-    meaning: "to thank for"
-  },
-  {
-    id: "sich-entscheiden-fuer-akk",
-    verb: "sich entscheiden",
-    prep: "für",
-    caseKey: "akk",
-    sentence: "Er entscheidet sich ___ den Kurs.",
-    pattern: "sich entscheiden für + Akkusativ",
-    meaning: "to decide on"
-  },
-  {
-    id: "sich-entschuldigen-fuer-akk",
-    verb: "sich entschuldigen",
-    prep: "für",
-    caseKey: "akk",
-    sentence: "Ich entschuldige mich ___ den Fehler.",
-    pattern: "sich entschuldigen für + Akkusativ",
-    meaning: "to apologize for"
-  },
-  {
-    id: "sich-interessieren-fuer-akk",
-    verb: "sich interessieren",
-    prep: "für",
-    caseKey: "akk",
-    sentence: "Lina interessiert sich ___ den Film.",
-    pattern: "sich interessieren für + Akkusativ",
-    meaning: "to be interested in"
-  },
-  {
-    id: "sorgen-fuer-akk",
-    verb: "sorgen",
-    prep: "für",
-    caseKey: "akk",
-    sentence: "Du sorgst ___ den Transport.",
-    pattern: "sorgen für + Akkusativ",
-    meaning: "to take care of/provide"
-  },
-  {
-    id: "investieren-in-akk",
-    verb: "investieren",
-    prep: "in",
-    caseKey: "akk",
-    sentence: "Wir investieren ___ die Weiterbildung.",
-    pattern: "investieren in + Akkusativ",
-    meaning: "to invest in"
-  },
-  {
-    id: "sich-verlieben-in-akk",
-    verb: "sich verlieben",
-    prep: "in",
-    caseKey: "akk",
-    sentence: "Sie verliebt sich ___ den Nachbarn.",
-    pattern: "sich verlieben in + Akkusativ",
-    meaning: "to fall in love with"
-  },
-  {
-    id: "uebersetzen-in-akk",
-    verb: "übersetzen",
-    prep: "in",
-    caseKey: "akk",
-    sentence: "Wir übersetzen den Text ___ die deutsche Sprache.",
-    pattern: "übersetzen in + Akkusativ",
-    meaning: "to translate into"
-  },
-  {
-    id: "anfangen-mit-dat",
-    verb: "anfangen",
-    prep: "mit",
-    caseKey: "dat",
-    sentence: "Wir fangen ___ dem ersten Kapitel an.",
-    pattern: "anfangen mit + Dativ",
-    meaning: "to start with"
-  },
-  {
-    id: "aufhoeren-mit-dat",
-    verb: "aufhören",
-    prep: "mit",
-    caseKey: "dat",
-    sentence: "Er hört ___ dem Rauchen auf.",
-    pattern: "aufhören mit + Dativ",
-    meaning: "to stop"
-  },
-  {
-    id: "beginnen-mit-dat",
-    verb: "beginnen",
-    prep: "mit",
-    caseKey: "dat",
-    sentence: "Der Kurs beginnt ___ einer Übung.",
-    pattern: "beginnen mit + Dativ",
-    meaning: "to begin with"
-  },
-  {
-    id: "rechnen-mit-dat",
-    verb: "rechnen",
-    prep: "mit",
-    caseKey: "dat",
-    sentence: "Wir rechnen ___ einem guten Ergebnis.",
-    pattern: "rechnen mit + Dativ",
-    meaning: "to expect/count on"
-  },
-  {
-    id: "sich-beschaeftigen-mit-dat",
-    verb: "sich beschäftigen",
-    prep: "mit",
-    caseKey: "dat",
-    sentence: "Sie beschäftigt sich ___ der Aufgabe.",
-    pattern: "sich beschäftigen mit + Dativ",
-    meaning: "to deal with"
-  },
-  {
-    id: "sich-treffen-mit-dat",
-    verb: "sich treffen",
-    prep: "mit",
-    caseKey: "dat",
-    sentence: "Ich treffe mich ___ einem Freund.",
-    pattern: "sich treffen mit + Dativ",
-    meaning: "to meet with"
-  },
-  {
-    id: "sprechen-mit-dat",
-    verb: "sprechen",
-    prep: "mit",
-    caseKey: "dat",
-    sentence: "Ich spreche ___ meinem Lehrer.",
-    pattern: "sprechen mit + Dativ",
-    meaning: "to speak with"
-  },
-  {
-    id: "telefonieren-mit-dat",
-    verb: "telefonieren",
-    prep: "mit",
-    caseKey: "dat",
-    sentence: "Sie telefoniert ___ ihrer Mutter.",
-    pattern: "telefonieren mit + Dativ",
-    meaning: "to talk on the phone with"
-  },
-  {
-    id: "sich-streiten-mit-dat",
-    verb: "sich streiten",
-    prep: "mit",
-    caseKey: "dat",
-    sentence: "Ich streite mich ___ meinem Bruder.",
-    pattern: "sich streiten mit + Dativ",
-    meaning: "to argue with"
-  },
-  {
-    id: "spielen-mit-dat",
-    verb: "spielen",
-    prep: "mit",
-    caseKey: "dat",
-    sentence: "Kinder spielen ___ dem Ball.",
-    pattern: "spielen mit + Dativ",
-    meaning: "to play with"
-  },
-  {
-    id: "diskutieren-mit-dat",
-    verb: "diskutieren",
-    prep: "mit",
-    caseKey: "dat",
-    sentence: "Ich diskutiere ___ dem Chef.",
-    pattern: "diskutieren mit + Dativ",
-    meaning: "to discuss with"
-  },
-  {
-    id: "verhandeln-mit-dat",
-    verb: "verhandeln",
-    prep: "mit",
-    caseKey: "dat",
-    sentence: "Die Firma verhandelt ___ den Partnern.",
-    pattern: "verhandeln mit + Dativ",
-    meaning: "to negotiate with"
-  },
-  {
-    id: "sich-versoehnen-mit-dat",
-    verb: "sich versöhnen",
-    prep: "mit",
-    caseKey: "dat",
-    sentence: "Ich habe mich ___ meinem Bruder versöhnt.",
-    pattern: "sich versöhnen mit + Dativ",
-    meaning: "to reconcile with"
-  },
-  {
-    id: "fragen-nach-dat",
-    verb: "fragen",
-    prep: "nach",
-    caseKey: "dat",
-    sentence: "Er fragt ___ dem Weg.",
-    pattern: "fragen nach + Dativ",
-    meaning: "to ask for/about"
-  },
-  {
-    id: "riechen-nach-dat",
-    verb: "riechen",
-    prep: "nach",
-    caseKey: "dat",
-    sentence: "Es riecht ___ dem Essen.",
-    pattern: "riechen nach + Dativ",
-    meaning: "to smell like"
-  },
-  {
-    id: "schmecken-nach-dat",
-    verb: "schmecken",
-    prep: "nach",
-    caseKey: "dat",
-    sentence: "Das schmeckt ___ frischem Brot.",
-    pattern: "schmecken nach + Dativ",
-    meaning: "to taste like"
-  },
-  {
-    id: "sich-erkundigen-nach-dat",
-    verb: "sich erkundigen",
-    prep: "nach",
-    caseKey: "dat",
-    sentence: "Er erkundigt sich ___ dem Preis.",
-    pattern: "sich erkundigen nach + Dativ",
-    meaning: "to inquire about"
-  },
-  {
-    id: "sich-sehnen-nach-dat",
-    verb: "sich sehnen",
-    prep: "nach",
-    caseKey: "dat",
-    sentence: "Ich sehne mich ___ dem Sommer.",
-    pattern: "sich sehnen nach + Dativ",
-    meaning: "to long for"
-  },
-  {
-    id: "suchen-nach-dat",
-    verb: "suchen",
-    prep: "nach",
-    caseKey: "dat",
-    sentence: "Ich suche ___ dem Schlüssel.",
-    pattern: "suchen nach + Dativ",
-    meaning: "to look for"
-  },
-  {
-    id: "streben-nach-dat",
-    verb: "streben",
-    prep: "nach",
-    caseKey: "dat",
-    sentence: "Wir streben ___ einem besseren Leben.",
-    pattern: "streben nach + Dativ",
-    meaning: "to strive for"
-  },
-  {
-    id: "benennen-nach-dat",
-    verb: "benennen",
-    prep: "nach",
-    caseKey: "dat",
-    sentence: "Die Straße wurde ___ einem Politiker benannt.",
-    pattern: "benennen nach + Dativ",
-    meaning: "to name after"
-  },
-  {
-    id: "beitragen-zu-dat",
-    verb: "beitragen",
-    prep: "zu",
-    caseKey: "dat",
-    sentence: "Das trägt ___ einer Lösung bei.",
-    pattern: "beitragen zu + Dativ",
-    meaning: "to contribute to"
-  },
-  {
-    id: "einladen-zu-dat",
-    verb: "einladen",
-    prep: "zu",
-    caseKey: "dat",
-    sentence: "Ich lade dich ___ meiner Party ein.",
-    pattern: "einladen zu + Dativ",
-    meaning: "to invite to"
-  },
-  {
-    id: "fuehren-zu-dat",
-    verb: "führen",
-    prep: "zu",
-    caseKey: "dat",
-    sentence: "Das führt ___ einem Problem.",
-    pattern: "führen zu + Dativ",
-    meaning: "to lead to"
-  },
-  {
-    id: "gehoeren-zu-dat",
-    verb: "gehören",
-    prep: "zu",
-    caseKey: "dat",
-    sentence: "Diese Schlüssel gehören ___ dieser Wohnung.",
-    pattern: "gehören zu + Dativ",
-    meaning: "to belong to"
-  },
-  {
-    id: "gratulieren-zu-dat",
-    verb: "gratulieren",
-    prep: "zu",
-    caseKey: "dat",
-    sentence: "Wir gratulieren dir ___ deinem Erfolg.",
-    pattern: "gratulieren zu + Dativ",
-    meaning: "to congratulate on"
-  },
-  {
-    id: "passen-zu-dat",
-    verb: "passen",
-    prep: "zu",
-    caseKey: "dat",
-    sentence: "Das passt ___ deinem Plan.",
-    pattern: "passen zu + Dativ",
-    meaning: "to fit/go with"
-  },
-  {
-    id: "sich-entschliessen-zu-dat",
-    verb: "sich entschließen",
-    prep: "zu",
-    caseKey: "dat",
-    sentence: "Ich entschließe mich ___ einem Studium.",
-    pattern: "sich entschließen zu + Dativ",
-    meaning: "to decide on"
-  },
-  {
-    id: "sich-bekennen-zu-dat",
-    verb: "sich bekennen",
-    prep: "zu",
-    caseKey: "dat",
-    sentence: "Er bekennt sich ___ seiner Schuld.",
-    pattern: "sich bekennen zu + Dativ",
-    meaning: "to admit/declare allegiance to"
-  },
-  {
-    id: "neigen-zu-dat",
-    verb: "neigen",
-    prep: "zu",
-    caseKey: "dat",
-    sentence: "Sie neigt ___ starken Reaktionen.",
-    pattern: "neigen zu + Dativ",
-    meaning: "to tend toward"
-  },
-  {
-    id: "bitten-um-akk",
-    verb: "bitten",
-    prep: "um",
-    caseKey: "akk",
-    sentence: "Ich bitte dich ___ einen Termin.",
-    pattern: "bitten um + Akkusativ",
-    meaning: "to ask for"
-  },
-  {
-    id: "sich-bewerben-um-akk",
-    verb: "sich bewerben",
-    prep: "um",
-    caseKey: "akk",
-    sentence: "Er bewirbt sich ___ die Stelle.",
-    pattern: "sich bewerben um + Akkusativ",
-    meaning: "to apply for"
-  },
-  {
-    id: "sich-kuemmern-um-akk",
-    verb: "sich kümmern",
-    prep: "um",
-    caseKey: "akk",
-    sentence: "Sie kümmert sich ___ die Anmeldung.",
-    pattern: "sich kümmern um + Akkusativ",
-    meaning: "to take care of"
-  },
-  {
-    id: "sich-sorgen-um-akk",
-    verb: "sich sorgen",
-    prep: "um",
-    caseKey: "akk",
-    sentence: "Ich sorge mich ___ den Patienten.",
-    pattern: "sich sorgen um + Akkusativ",
-    meaning: "to worry about"
-  },
-  {
-    id: "sich-streiten-um-akk",
-    verb: "sich streiten",
-    prep: "um",
-    caseKey: "akk",
-    sentence: "Sie streiten sich ___ den Parkplatz.",
-    pattern: "sich streiten um + Akkusativ",
-    meaning: "to argue over"
-  },
-  {
-    id: "sich-bemuehen-um-akk",
-    verb: "sich bemühen",
-    prep: "um",
-    caseKey: "akk",
-    sentence: "Ich bemühe mich ___ einen Platz.",
-    pattern: "sich bemühen um + Akkusativ",
-    meaning: "to make an effort for"
-  },
-  {
-    id: "werben-um-akk",
-    verb: "werben",
-    prep: "um",
-    caseKey: "akk",
-    sentence: "Die Firma wirbt ___ den Auftrag.",
-    pattern: "werben um + Akkusativ",
-    meaning: "to court/seek"
-  },
-  {
-    id: "es-geht-um-akk",
-    verb: "es geht",
-    prep: "um",
-    caseKey: "akk",
-    sentence: "Es geht ___ den Vertrag.",
-    pattern: "es geht um + Akkusativ",
-    meaning: "to be about"
-  },
-  {
-    id: "berichten-ueber-akk",
-    verb: "berichten",
-    prep: "über",
-    caseKey: "akk",
-    sentence: "Die Zeitung berichtet ___ den Unfall.",
-    pattern: "berichten über + Akkusativ",
-    meaning: "to report on"
-  },
-  {
-    id: "sprechen-ueber-akk",
-    verb: "sprechen",
-    prep: "über",
-    caseKey: "akk",
-    sentence: "Wir sprechen ___ das Wetter.",
-    pattern: "sprechen über + Akkusativ",
-    meaning: "to talk about"
-  },
-  {
-    id: "diskutieren-ueber-akk",
-    verb: "diskutieren",
-    prep: "über",
-    caseKey: "akk",
-    sentence: "Wir diskutieren ___ den Plan.",
-    pattern: "diskutieren über + Akkusativ",
-    meaning: "to discuss"
-  },
-  {
-    id: "lachen-ueber-akk",
-    verb: "lachen",
-    prep: "über",
-    caseKey: "akk",
-    sentence: "Sie lacht ___ den Witz.",
-    pattern: "lachen über + Akkusativ",
-    meaning: "to laugh about"
-  },
-  {
-    id: "nachdenken-ueber-akk",
-    verb: "nachdenken",
-    prep: "über",
-    caseKey: "akk",
-    sentence: "Ich denke ___ das Angebot nach.",
-    pattern: "nachdenken über + Akkusativ",
-    meaning: "to think about"
-  },
-  {
-    id: "sich-aergern-ueber-akk",
-    verb: "sich ärgern",
-    prep: "über",
-    caseKey: "akk",
-    sentence: "Er ärgert sich ___ den Fehler.",
-    pattern: "sich ärgern über + Akkusativ",
-    meaning: "to be annoyed about"
-  },
-  {
-    id: "sich-beschweren-ueber-akk",
-    verb: "sich beschweren",
-    prep: "über",
-    caseKey: "akk",
-    sentence: "Der Kunde beschwert sich ___ den Lärm.",
-    pattern: "sich beschweren über + Akkusativ",
-    meaning: "to complain about"
-  },
-  {
-    id: "sich-freuen-ueber-akk",
-    verb: "sich freuen",
-    prep: "über",
-    caseKey: "akk",
-    sentence: "Sie freut sich ___ das Geschenk.",
-    pattern: "sich freuen über + Akkusativ",
-    meaning: "to be happy about"
-  },
-  {
-    id: "sich-informieren-ueber-akk",
-    verb: "sich informieren",
-    prep: "über",
-    caseKey: "akk",
-    sentence: "Ich informiere mich ___ das Thema.",
-    pattern: "sich informieren über + Akkusativ",
-    meaning: "to inform oneself about"
-  },
-  {
-    id: "sich-wundern-ueber-akk",
-    verb: "sich wundern",
-    prep: "über",
-    caseKey: "akk",
-    sentence: "Ich wundere mich ___ seine Reaktion.",
-    pattern: "sich wundern über + Akkusativ",
-    meaning: "to be surprised about"
-  },
-  {
-    id: "bestehen-aus-dat",
-    verb: "bestehen",
-    prep: "aus",
-    caseKey: "dat",
-    sentence: "Das Paket besteht ___ einem Buch und einem Heft.",
-    pattern: "bestehen aus + Dativ",
-    meaning: "to consist of"
-  },
-  {
-    id: "kommen-aus-dat",
-    verb: "kommen",
-    prep: "aus",
-    caseKey: "dat",
-    sentence: "Er kommt ___ der Schweiz.",
-    pattern: "kommen aus + Dativ",
-    meaning: "to come from"
-  },
-  {
-    id: "abhaengen-von-dat",
-    verb: "abhängen",
-    prep: "von",
-    caseKey: "dat",
-    sentence: "Das hängt ___ deiner Entscheidung ab.",
-    pattern: "abhängen von + Dativ",
-    meaning: "to depend on"
-  },
-  {
-    id: "traeumen-von-dat",
-    verb: "träumen",
-    prep: "von",
-    caseKey: "dat",
-    sentence: "Ich träume ___ einem Haus am Meer.",
-    pattern: "träumen von + Dativ",
-    meaning: "to dream of"
-  },
-  {
-    id: "erzaehlen-von-dat",
-    verb: "erzählen",
-    prep: "von",
-    caseKey: "dat",
-    sentence: "Sie erzählt ___ ihrer Reise.",
-    pattern: "erzählen von + Dativ",
-    meaning: "to tell about"
-  },
-  {
-    id: "wissen-von-dat",
-    verb: "wissen",
-    prep: "von",
-    caseKey: "dat",
-    sentence: "Weißt du ___ dem Termin?",
-    pattern: "wissen von + Dativ",
-    meaning: "to know about"
-  },
-  {
-    id: "hoeren-von-dat",
-    verb: "hören",
-    prep: "von",
-    caseKey: "dat",
-    sentence: "Ich habe ___ der Änderung gehört.",
-    pattern: "hören von + Dativ",
-    meaning: "to hear about/from"
-  },
-  {
-    id: "reden-von-dat",
-    verb: "reden",
-    prep: "von",
-    caseKey: "dat",
-    sentence: "Wir reden ___ dem Problem.",
-    pattern: "reden von + Dativ",
-    meaning: "to talk about"
-  },
-  {
-    id: "leben-von-dat",
-    verb: "leben",
-    prep: "von",
-    caseKey: "dat",
-    sentence: "Er lebt ___ seinem Gehalt.",
-    pattern: "leben von + Dativ",
-    meaning: "to live on"
-  },
-  {
-    id: "handeln-von-dat",
-    verb: "handeln",
-    prep: "von",
-    caseKey: "dat",
-    sentence: "Der Film handelt ___ einer Familie.",
-    pattern: "handeln von + Dativ",
-    meaning: "to be about"
-  },
-  {
-    id: "profitieren-von-dat",
-    verb: "profitieren",
-    prep: "von",
-    caseKey: "dat",
-    sentence: "Wir profitieren ___ der Erfahrung.",
-    pattern: "profitieren von + Dativ",
-    meaning: "to benefit from"
-  },
-  {
-    id: "sich-trennen-von-dat",
-    verb: "sich trennen",
-    prep: "von",
-    caseKey: "dat",
-    sentence: "Sie trennt sich ___ ihrem Auto.",
-    pattern: "sich trennen von + Dativ",
-    meaning: "to separate from"
-  },
-  {
-    id: "sich-verabschieden-von-dat",
-    verb: "sich verabschieden",
-    prep: "von",
-    caseKey: "dat",
-    sentence: "Wir verabschieden uns ___ unseren Gästen.",
-    pattern: "sich verabschieden von + Dativ",
-    meaning: "to say goodbye to"
-  },
-  {
-    id: "sich-erholen-von-dat",
-    verb: "sich erholen",
-    prep: "von",
-    caseKey: "dat",
-    sentence: "Ich erhole mich ___ der Krankheit.",
-    pattern: "sich erholen von + Dativ",
-    meaning: "to recover from"
-  },
-  {
-    id: "schuetzen-vor-dat",
-    verb: "schützen",
-    prep: "vor",
-    caseKey: "dat",
-    sentence: "Die Brille schützt ___ der Sonne.",
-    pattern: "schützen vor + Dativ",
-    meaning: "to protect from"
-  },
-  {
-    id: "sich-fuerchten-vor-dat",
-    verb: "sich fürchten",
-    prep: "vor",
-    caseKey: "dat",
-    sentence: "Sie fürchtet sich ___ der Prüfung.",
-    pattern: "sich fürchten vor + Dativ",
-    meaning: "to be afraid of"
-  },
-  {
-    id: "warnen-vor-dat",
-    verb: "warnen",
-    prep: "vor",
-    caseKey: "dat",
-    sentence: "Ich warne dich ___ dem Hund.",
-    pattern: "warnen vor + Dativ",
-    meaning: "to warn about"
-  }
-];
-
 const PREPOSITIONS = Array.from(new Set(VERB_ITEMS.map((item) => item.prep))).sort((a, b) =>
   a.localeCompare(b, "de-DE")
 );
@@ -1352,155 +395,6 @@ const TRANSLATION_LANGUAGES = {
   ru: "Русский",
   uk: "Українська",
   tr: "Türkçe"
-};
-
-const VERB_TRANSLATIONS = {
-  "achten-auf-akk": {
-    en: {
-      verb: "to pay attention",
-      meaning: "to pay attention to",
-      sentence: "Pay attention to the traffic."
-    },
-    ru: {
-      verb: "обращать внимание",
-      meaning: "обращать внимание на",
-      sentence: "Обрати внимание на движение."
-    },
-    uk: {
-      verb: "звертати увагу",
-      meaning: "звертати увагу на",
-      sentence: "Зверни увагу на дорожній рух."
-    },
-    tr: {
-      verb: "dikkat etmek",
-      meaning: "bir şeye dikkat etmek",
-      sentence: "Trafiğe dikkat et."
-    }
-  },
-  "warten-auf-akk": {
-    en: { verb: "to wait", meaning: "to wait for", sentence: "I am waiting for the bus." },
-    ru: { verb: "ждать", meaning: "ждать чего-либо", sentence: "Я жду автобус." },
-    uk: { verb: "чекати", meaning: "чекати на щось", sentence: "Я чекаю на автобус." },
-    tr: { verb: "beklemek", meaning: "bir şeyi beklemek", sentence: "Otobüsü bekliyorum." }
-  },
-  "sich-freuen-auf-akk": {
-    en: {
-      verb: "to look forward to",
-      meaning: "to look forward to",
-      sentence: "I am looking forward to the vacation."
-    },
-    ru: {
-      verb: "с нетерпением ждать",
-      meaning: "с нетерпением ждать чего-либо",
-      sentence: "Я с нетерпением жду отпуска."
-    },
-    uk: {
-      verb: "з нетерпінням чекати",
-      meaning: "з нетерпінням чекати на щось",
-      sentence: "Я з нетерпінням чекаю на відпустку."
-    },
-    tr: {
-      verb: "dört gözle beklemek",
-      meaning: "bir şeyi dört gözle beklemek",
-      sentence: "Tatili dört gözle bekliyorum."
-    }
-  },
-  "sich-vorbereiten-auf-akk": {
-    en: { verb: "to prepare", meaning: "to prepare for", sentence: "I am preparing for the exam." },
-    ru: { verb: "готовиться", meaning: "готовиться к", sentence: "Я готовлюсь к экзамену." },
-    uk: { verb: "готуватися", meaning: "готуватися до", sentence: "Я готуюся до іспиту." },
-    tr: { verb: "hazırlanmak", meaning: "bir şeye hazırlanmak", sentence: "Sınava hazırlanıyorum." }
-  },
-  "denken-an-akk": {
-    en: { verb: "to think", meaning: "to think of/about", sentence: "Are you thinking about the appointment?" },
-    ru: { verb: "думать", meaning: "думать о", sentence: "Ты думаешь о встрече?" },
-    uk: { verb: "думати", meaning: "думати про", sentence: "Ти думаєш про зустріч?" },
-    tr: { verb: "düşünmek", meaning: "bir şeyi düşünmek", sentence: "Randevuyu düşünüyor musun?" }
-  },
-  "glauben-an-akk": {
-    en: { verb: "to believe", meaning: "to believe in", sentence: "We believe in success." },
-    ru: { verb: "верить", meaning: "верить в", sentence: "Мы верим в успех." },
-    uk: { verb: "вірити", meaning: "вірити в", sentence: "Ми віримо в успіх." },
-    tr: { verb: "inanmak", meaning: "bir şeye inanmak", sentence: "Başarıya inanıyoruz." }
-  },
-  "danken-fuer-akk": {
-    en: { verb: "to thank", meaning: "to thank for", sentence: "I thank you for the hint." },
-    ru: { verb: "благодарить", meaning: "благодарить за", sentence: "Я благодарю тебя за подсказку." },
-    uk: { verb: "дякувати", meaning: "дякувати за", sentence: "Я дякую тобі за підказку." },
-    tr: { verb: "teşekkür etmek", meaning: "bir şey için teşekkür etmek", sentence: "İpucu için sana teşekkür ederim." }
-  },
-  "sich-entscheiden-fuer-akk": {
-    en: { verb: "to decide", meaning: "to decide on", sentence: "He decides on the course." },
-    ru: { verb: "выбирать", meaning: "выбрать что-либо", sentence: "Он выбирает курс." },
-    uk: { verb: "обирати", meaning: "обрати щось", sentence: "Він обирає курс." },
-    tr: { verb: "karar vermek", meaning: "bir şeye karar vermek", sentence: "Kursa karar veriyor." }
-  },
-  "sich-interessieren-fuer-akk": {
-    en: { verb: "to be interested", meaning: "to be interested in", sentence: "Lina is interested in the film." },
-    ru: { verb: "интересоваться", meaning: "интересоваться чем-либо", sentence: "Лина интересуется фильмом." },
-    uk: { verb: "цікавитися", meaning: "цікавитися чимось", sentence: "Ліна цікавиться фільмом." },
-    tr: { verb: "ilgilenmek", meaning: "bir şeyle ilgilenmek", sentence: "Lina filmle ilgileniyor." }
-  },
-  "sprechen-mit-dat": {
-    en: { verb: "to speak", meaning: "to speak with", sentence: "I am speaking with my teacher." },
-    ru: { verb: "говорить", meaning: "говорить с", sentence: "Я говорю с моим учителем." },
-    uk: { verb: "говорити", meaning: "говорити з", sentence: "Я говорю зі своїм учителем." },
-    tr: { verb: "konuşmak", meaning: "biriyle konuşmak", sentence: "Öğretmenimle konuşuyorum." }
-  },
-  "sich-beschaeftigen-mit-dat": {
-    en: { verb: "to deal with", meaning: "to deal with", sentence: "She is dealing with the task." },
-    ru: { verb: "заниматься", meaning: "заниматься чем-либо", sentence: "Она занимается задачей." },
-    uk: { verb: "займатися", meaning: "займатися чимось", sentence: "Вона займається завданням." },
-    tr: { verb: "uğraşmak", meaning: "bir şeyle uğraşmak", sentence: "Görevle uğraşıyor." }
-  },
-  "teilnehmen-an-dat": {
-    en: { verb: "to participate", meaning: "to participate in", sentence: "He participates in the course." },
-    ru: { verb: "участвовать", meaning: "участвовать в", sentence: "Он участвует в курсе." },
-    uk: { verb: "брати участь", meaning: "брати участь у", sentence: "Він бере участь у курсі." },
-    tr: { verb: "katılmak", meaning: "bir şeye katılmak", sentence: "Kursa katılıyor." }
-  },
-  "sich-beschweren-ueber-akk": {
-    en: { verb: "to complain", meaning: "to complain about", sentence: "The customer complains about the noise." },
-    ru: { verb: "жаловаться", meaning: "жаловаться на", sentence: "Клиент жалуется на шум." },
-    uk: { verb: "скаржитися", meaning: "скаржитися на", sentence: "Клієнт скаржиться на шум." },
-    tr: { verb: "şikayet etmek", meaning: "bir şeyden şikayet etmek", sentence: "Müşteri gürültüden şikayet ediyor." }
-  },
-  "traeumen-von-dat": {
-    en: { verb: "to dream", meaning: "to dream of", sentence: "I dream of a house by the sea." },
-    ru: { verb: "мечтать", meaning: "мечтать о", sentence: "Я мечтаю о доме у моря." },
-    uk: { verb: "мріяти", meaning: "мріяти про", sentence: "Я мрію про будинок біля моря." },
-    tr: { verb: "hayal etmek", meaning: "bir şeyin hayalini kurmak", sentence: "Deniz kıyısında bir ev hayal ediyorum." }
-  },
-  "abhaengen-von-dat": {
-    en: { verb: "to depend", meaning: "to depend on", sentence: "That depends on your decision." },
-    ru: { verb: "зависеть", meaning: "зависеть от", sentence: "Это зависит от твоего решения." },
-    uk: { verb: "залежати", meaning: "залежати від", sentence: "Це залежить від твого рішення." },
-    tr: { verb: "bağlı olmak", meaning: "bir şeye bağlı olmak", sentence: "Bu senin kararına bağlı." }
-  },
-  "sich-kuemmern-um-akk": {
-    en: { verb: "to take care", meaning: "to take care of", sentence: "She takes care of the registration." },
-    ru: { verb: "заниматься", meaning: "заниматься чем-либо", sentence: "Она занимается регистрацией." },
-    uk: { verb: "займатися", meaning: "займатися чимось", sentence: "Вона займається реєстрацією." },
-    tr: { verb: "ilgilenmek", meaning: "bir şeyle ilgilenmek", sentence: "Kayıtla ilgileniyor." }
-  },
-  "sich-verlieben-in-akk": {
-    en: { verb: "to fall in love", meaning: "to fall in love with", sentence: "She falls in love with the neighbor." },
-    ru: { verb: "влюбляться", meaning: "влюбляться в", sentence: "Она влюбляется в соседа." },
-    uk: { verb: "закохуватися", meaning: "закохуватися в", sentence: "Вона закохується в сусіда." },
-    tr: { verb: "aşık olmak", meaning: "birine aşık olmak", sentence: "Komşusuna aşık oluyor." }
-  },
-  "sprechen-ueber-akk": {
-    en: { verb: "to talk", meaning: "to talk about", sentence: "We are talking about the weather." },
-    ru: { verb: "говорить", meaning: "говорить о", sentence: "Мы говорим о погоде." },
-    uk: { verb: "говорити", meaning: "говорити про", sentence: "Ми говоримо про погоду." },
-    tr: { verb: "konuşmak", meaning: "bir şey hakkında konuşmak", sentence: "Hava durumu hakkında konuşuyoruz." }
-  },
-  "sich-freuen-ueber-akk": {
-    en: { verb: "to be happy", meaning: "to be happy about", sentence: "She is happy about the gift." },
-    ru: { verb: "радоваться", meaning: "радоваться чему-либо", sentence: "Она рада подарку." },
-    uk: { verb: "радіти", meaning: "радіти чомусь", sentence: "Вона рада подарунку." },
-    tr: { verb: "sevinmek", meaning: "bir şeye sevinmek", sentence: "Hediyeye seviniyor." }
-  }
 };
 
 const elements = {
@@ -1620,11 +514,26 @@ function saveTranslationLanguage() {
   localStorage.setItem(TRANSLATION_LANGUAGE_KEY, appState.translationLanguage);
 }
 
-function completedVerbSentence(item) {
-  return item.sentence.replace("___", item.prep);
+function completedVerbSentence(item, sentence = item.sentence) {
+  return sentence.replace("___", item.prep);
 }
 
-function verbTranslationFor(item) {
+function verbSentencesFor(item) {
+  if (Array.isArray(item.sentences) && item.sentences.length) {
+    return item.sentences;
+  }
+  return [item.sentence];
+}
+
+function sampleVerbSentence(item) {
+  return sample(verbSentencesFor(item));
+}
+
+function verbMeaningFor(item) {
+  return VERB_TRANSLATIONS[item.id]?.en?.meaning || item.pattern;
+}
+
+function verbTranslationFor(item, sentence = item.sentence) {
   const language = Object.prototype.hasOwnProperty.call(
     TRANSLATION_LANGUAGES,
     appState.translationLanguage
@@ -1635,8 +544,8 @@ function verbTranslationFor(item) {
     language,
     languageLabel: TRANSLATION_LANGUAGES[language],
     verb: item.verb,
-    meaning: item.meaning,
-    sentence: language === "en" ? completedVerbSentence(item) : "Translation coming soon."
+    meaning: verbMeaningFor(item),
+    sentence: language === "en" ? completedVerbSentence(item, sentence) : "Translation coming soon."
   };
   return {
     ...base,
@@ -1710,8 +619,8 @@ function verbSearchText(item) {
       CASES[item.caseKey],
       CASE_SHORT[item.caseKey],
       item.pattern,
-      item.meaning,
-      item.sentence
+      verbMeaningFor(item),
+      ...verbSentencesFor(item)
     ].join(" ")
   );
 }
@@ -1874,7 +783,7 @@ function refreshCurrentVerbTranslation() {
   if (!item) {
     return;
   }
-  const translation = verbTranslationFor(item);
+  const translation = verbTranslationFor(item, appState.current.verbSentence || item.sentence);
   appState.current.translation = translation;
   appState.current.meta = appState.current.meta.map(([label, value]) =>
     label === "Meaning" ? [label, translation.meaning] : [label, value]
@@ -1942,7 +851,8 @@ function exerciseFromMistake(miss) {
     reviewSignature: miss.signature
   };
   if (exercise.verbItemId && VERB_LOOKUP.has(exercise.verbItemId)) {
-    const translation = verbTranslationFor(VERB_LOOKUP.get(exercise.verbItemId));
+    const item = VERB_LOOKUP.get(exercise.verbItemId);
+    const translation = verbTranslationFor(item, exercise.verbSentence || item.sentence);
     exercise.translation = translation;
     exercise.meta = exercise.meta.map(([label, value]) =>
       label === "Meaning" ? [label, translation.meaning] : [label, value]
@@ -2161,15 +1071,18 @@ function buildAdjectiveExercise() {
 function buildVerbExercise() {
   const item = weightedPick(activeVerbItems());
   const mode = appState.verbMode;
-  const translation = verbTranslationFor(item);
+  const sentence = sampleVerbSentence(item);
+  const completedSentence = sentence.replace("___", item.prep);
+  const translation = verbTranslationFor(item, sentence);
 
   if (mode === "case") {
     return {
       topic: "verbs",
       verbItemId: item.id,
+      verbSentence: sentence,
       id: `verb-case:${item.id}`,
       title: "Case after preposition",
-      prompt: item.sentence.replace("___", item.prep),
+      prompt: completedSentence,
       answer: CASES[item.caseKey],
       options: shuffle(["Akkusativ", "Dativ", "Genitiv", "Nominativ"]),
       meta: [
@@ -2190,9 +1103,10 @@ function buildVerbExercise() {
     return {
       topic: "verbs",
       verbItemId: item.id,
+      verbSentence: sentence,
       id: `verb-pattern:${item.id}`,
       title: "Full verb pattern",
-      prompt: item.sentence.replace("___", item.prep),
+      prompt: completedSentence,
       answer: item.pattern,
       options: shuffle([item.pattern, ...distractors]),
       meta: [
@@ -2211,9 +1125,10 @@ function buildVerbExercise() {
   return {
     topic: "verbs",
     verbItemId: item.id,
+    verbSentence: sentence,
     id: `verb-prep:${item.id}`,
     title: "Missing preposition",
-    prompt: item.sentence,
+    prompt: sentence,
     answer: item.prep,
     options: shuffle([item.prep, ...distractors]),
     meta: [
@@ -2569,7 +1484,7 @@ function renderVerbTrainingList() {
     const name = document.createElement("strong");
     name.textContent = verbItem.verb;
     const detail = document.createElement("span");
-    detail.textContent = `${verbPatternLabel(verbItem)} · ${verbItem.meaning}`;
+    detail.textContent = `${verbPatternLabel(verbItem)} · ${verbMeaningFor(verbItem)}`;
     button.append(name, detail);
     button.addEventListener("click", () => toggleVerbInTrainingList(verbItem.id));
     item.append(button);
