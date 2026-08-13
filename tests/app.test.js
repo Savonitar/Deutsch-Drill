@@ -69,57 +69,63 @@ assert(
   "Data scripts should load before app.js"
 );
 
-const elements = new Map();
-const topicButtons = ["adjective", "verbs"].map((topic) => {
-  const button = makeElement(`[data-topic=${topic}]`);
-  button.dataset.topic = topic;
-  return button;
-});
+function makeHarness(initialStorage = {}) {
+  const elements = new Map();
+  const topicButtons = ["adjective", "verbs"].map((topic) => {
+    const button = makeElement(`[data-topic=${topic}]`);
+    button.dataset.topic = topic;
+    return button;
+  });
 
-const document = {
-  activeElement: null,
-  querySelector(selector) {
-    if (!elements.has(selector)) {
-      elements.set(selector, makeElement(selector));
+  const document = {
+    activeElement: null,
+    querySelector(selector) {
+      if (!elements.has(selector)) {
+        elements.set(selector, makeElement(selector));
+      }
+      return elements.get(selector);
+    },
+    querySelectorAll(selector) {
+      return selector === "[data-topic]" ? topicButtons : [];
+    },
+    createElement(tagName) {
+      return makeElement(tagName);
     }
-    return elements.get(selector);
-  },
-  querySelectorAll(selector) {
-    return selector === "[data-topic]" ? topicButtons : [];
-  },
-  createElement(tagName) {
-    return makeElement(tagName);
-  }
-};
+  };
 
-const storage = new Map();
-const localStorage = {
-  getItem(key) {
-    return storage.has(key) ? storage.get(key) : null;
-  },
-  setItem(key, value) {
-    storage.set(key, String(value));
-  },
-  removeItem(key) {
-    storage.delete(key);
-  }
-};
+  const storage = new Map(Object.entries(initialStorage));
+  const localStorage = {
+    getItem(key) {
+      return storage.has(key) ? storage.get(key) : null;
+    },
+    setItem(key, value) {
+      storage.set(key, String(value));
+    },
+    removeItem(key) {
+      storage.delete(key);
+    }
+  };
 
-const context = vm.createContext({
-  assert,
-  document,
-  elementMap: elements,
-  localStorage,
-  window: { confirm: () => true },
-  console,
-  Math,
-  Date,
-  Array,
-  Object,
-  Set,
-  String,
-  JSON
-});
+  const context = vm.createContext({
+    assert,
+    document,
+    elementMap: elements,
+    localStorage,
+    window: { confirm: () => true },
+    console,
+    Math,
+    Date,
+    Array,
+    Object,
+    Set,
+    String,
+    JSON
+  });
+
+  return { context, elements, localStorage };
+}
+
+const { context, elements, localStorage } = makeHarness();
 
 vm.runInContext(`${app}
 
@@ -209,6 +215,38 @@ vm.runInContext(`${app}
   for (const id of Object.keys(VERB_TRANSLATIONS)) {
     assert(verbIds.has(id), "Translation references unknown verb id: " + id);
   }
+
+  assert(appState.topic === "adjective", "Default topic should be adjective practice");
+  assert(appState.verbMode === "prep", "Default verb mode should be preposition practice");
+  document
+    .querySelectorAll("[data-topic]")
+    .find((button) => button.dataset.topic === "verbs")
+    .listeners.click();
+  const patternButton = elementMap
+    .get("#controlsRow")
+    .children.find((button) => button.textContent === "Pattern");
+  patternButton.listeners.click();
+  const savedUiPreferences = JSON.parse(localStorage.getItem(UI_PREFERENCES_KEY));
+  assert(savedUiPreferences.topic === "verbs", "Topic tab clicks should save UI preference");
+  assert(savedUiPreferences.verbMode === "pattern", "Verb mode clicks should save UI preference");
+  localStorage.setItem(
+    UI_PREFERENCES_KEY,
+    JSON.stringify({ topic: "verbs", adjMode: "ending", adjFilter: "strong", verbMode: "case" })
+  );
+  const loadedUiPreferences = loadUiPreferences();
+  assert(loadedUiPreferences.topic === "verbs", "Saved topic should load");
+  assert(loadedUiPreferences.adjMode === "ending", "Saved adjective mode should load");
+  assert(loadedUiPreferences.adjFilter === "strong", "Saved adjective filter should load");
+  assert(loadedUiPreferences.verbMode === "case", "Saved verb mode should load");
+  localStorage.setItem(
+    UI_PREFERENCES_KEY,
+    JSON.stringify({ topic: "bad", adjMode: "bad", adjFilter: "bad", verbMode: "bad" })
+  );
+  const sanitizedUiPreferences = loadUiPreferences();
+  assert(sanitizedUiPreferences.topic === "adjective", "Invalid saved topic should fall back");
+  assert(sanitizedUiPreferences.adjMode === "form", "Invalid adjective mode should fall back");
+  assert(sanitizedUiPreferences.adjFilter === "all", "Invalid adjective filter should fall back");
+  assert(sanitizedUiPreferences.verbMode === "prep", "Invalid verb mode should fall back");
 
   for (const mode of ["form", "ending", "case", "article", "gender"]) {
     appState.topic = "adjective";
@@ -545,5 +583,25 @@ vm.runInContext(`${app}
   submitAnswer();
   assert(appState.progress.misses[0].resolved, "Correct review should mark miss resolved");
 })()`, context, { filename: "app.js" });
+
+const { context: reloadContext } = makeHarness({
+  "deutsch-drill-ui-preferences-v1": JSON.stringify({
+    topic: "verbs",
+    adjMode: "ending",
+    adjFilter: "strong",
+    verbMode: "case"
+  })
+});
+
+vm.runInContext(`${app}
+
+(() => {
+  assert(appState.topic === "verbs", "Startup should restore saved topic");
+  assert(appState.adjMode === "ending", "Startup should restore saved adjective mode");
+  assert(appState.adjFilter === "strong", "Startup should restore saved adjective filter");
+  assert(appState.verbMode === "case", "Startup should restore saved verb mode");
+  assert(appState.current.topic === "verbs", "Initial exercise should use restored topic");
+  assert(appState.current.title === "Case after preposition", "Initial exercise should use restored verb mode");
+})()`, reloadContext, { filename: "app-reload.js" });
 
 console.log("app tests ok");

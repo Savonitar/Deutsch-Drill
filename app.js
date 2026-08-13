@@ -4,7 +4,19 @@ const STORE_KEY = "deutsch-drill-progress-v1";
 const TRAINING_LIST_KEY = "deutsch-drill-training-list-v1";
 const TRANSLATION_LANGUAGE_KEY = "deutsch-drill-translation-language-v1";
 const FAVORITES_KEY = "deutsch-drill-favourites-v1";
+const UI_PREFERENCES_KEY = "deutsch-drill-ui-preferences-v1";
 const VERB_SENTENCE_COOLDOWN = 8;
+
+const TOPICS = ["adjective", "verbs"];
+const ADJECTIVE_MODES = ["form", "ending", "case", "article", "gender"];
+const ADJECTIVE_FILTERS = ["all", "definite", "mixed", "strong"];
+const VERB_MODES = ["prep", "case", "pattern"];
+const DEFAULT_UI_PREFERENCES = {
+  topic: "adjective",
+  adjMode: "form",
+  adjFilter: "all",
+  verbMode: "prep"
+};
 
 const CASES = {
   nom: "Nominativ",
@@ -440,11 +452,13 @@ const elements = {
   favoriteClear: document.querySelector("#favoriteClear")
 };
 
+const uiPreferences = loadUiPreferences();
+
 const appState = {
-  topic: "adjective",
-  adjMode: "form",
-  adjFilter: "all",
-  verbMode: "prep",
+  topic: uiPreferences.topic,
+  adjMode: uiPreferences.adjMode,
+  adjFilter: uiPreferences.adjFilter,
+  verbMode: uiPreferences.verbMode,
   verbSearch: "",
   verbBulkStatus: "",
   translationLanguage: loadTranslationLanguage(),
@@ -522,6 +536,46 @@ function loadTranslationLanguage() {
 
 function saveTranslationLanguage() {
   localStorage.setItem(TRANSLATION_LANGUAGE_KEY, appState.translationLanguage);
+}
+
+function loadUiPreferences() {
+  try {
+    const saved = JSON.parse(localStorage.getItem(UI_PREFERENCES_KEY));
+    return sanitizeUiPreferences(saved);
+  } catch (error) {
+    localStorage.removeItem(UI_PREFERENCES_KEY);
+  }
+  return { ...DEFAULT_UI_PREFERENCES };
+}
+
+function sanitizeUiPreferences(saved) {
+  if (!saved || typeof saved !== "object") {
+    return { ...DEFAULT_UI_PREFERENCES };
+  }
+  return {
+    topic: TOPICS.includes(saved.topic) ? saved.topic : DEFAULT_UI_PREFERENCES.topic,
+    adjMode: ADJECTIVE_MODES.includes(saved.adjMode)
+      ? saved.adjMode
+      : DEFAULT_UI_PREFERENCES.adjMode,
+    adjFilter: ADJECTIVE_FILTERS.includes(saved.adjFilter)
+      ? saved.adjFilter
+      : DEFAULT_UI_PREFERENCES.adjFilter,
+    verbMode: VERB_MODES.includes(saved.verbMode)
+      ? saved.verbMode
+      : DEFAULT_UI_PREFERENCES.verbMode
+  };
+}
+
+function saveUiPreferences() {
+  localStorage.setItem(
+    UI_PREFERENCES_KEY,
+    JSON.stringify({
+      topic: appState.topic,
+      adjMode: appState.adjMode,
+      adjFilter: appState.adjFilter,
+      verbMode: appState.verbMode
+    })
+  );
 }
 
 function loadFavorites() {
@@ -1133,6 +1187,7 @@ function startFavorite(signature) {
   appState.answered = false;
   elements.feedbackBox.textContent = "";
   elements.feedbackBox.className = "feedback";
+  saveUiPreferences();
   render();
 }
 
@@ -1581,6 +1636,7 @@ function renderControls() {
         saveFavorites();
         appState.verbMode = value;
       }
+      saveUiPreferences();
       nextExercise();
     });
     elements.controlsRow.append(button);
@@ -1916,6 +1972,7 @@ elements.topicButtons.forEach((button) => {
   button.addEventListener("click", () => {
     appState.topic = button.dataset.topic;
     appState.reviewOnly = false;
+    saveUiPreferences();
     nextExercise();
   });
 });
