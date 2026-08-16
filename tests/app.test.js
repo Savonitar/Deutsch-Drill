@@ -528,6 +528,31 @@ vm.runInContext(`${app}
   );
 
   clearVerbTrainingList();
+  appState.verbSearch =
+    "sich interessieren für, sich kümmern um, teilnehmen an, gehören zu, ankommen auf, denken an, sich ärgern über, sprechen mit, diskutieren über";
+  const screenshotListSummary = bulkVerbSummary();
+  assert(
+    !screenshotListSummary.missing.length,
+    "Bulk paste should accept full verb-preposition phrases"
+  );
+  [
+    "sich-interessieren-fuer-akk",
+    "sich-kuemmern-um-akk",
+    "teilnehmen-an-dat",
+    "gehoeren-zu-dat",
+    "ankommen-auf-akk",
+    "denken-an-akk",
+    "sich-aergern-ueber-akk",
+    "sprechen-mit-dat",
+    "diskutieren-ueber-akk"
+  ].forEach((id) => {
+    assert(
+      screenshotListSummary.items.some((item) => item.id === id),
+      "Bulk paste should match phrase item: " + id
+    );
+  });
+
+  clearVerbTrainingList();
   appState.verbSearch = "denken, missingverb";
   addBulkVerbMatches();
   assert(

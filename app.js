@@ -854,8 +854,22 @@ function normalizeVerbName(value) {
     .trim();
 }
 
-function bareVerbName(value) {
-  return normalizeVerbName(value).replace(/^sich\s+/, "");
+function normalizeGermanKeyboard(value) {
+  return String(value)
+    .toLocaleLowerCase("de-DE")
+    .replace(/ä/g, "ae")
+    .replace(/ö/g, "oe")
+    .replace(/ü/g, "ue")
+    .replace(/ß/g, "ss")
+    .replace(/[^a-z0-9\s]+/g, " ")
+    .replace(/\s+/g, " ")
+    .trim();
+}
+
+function normalizedTermForms(value) {
+  return Array.from(
+    new Set([normalizeVerbName(value), normalizeGermanKeyboard(value)].filter(Boolean))
+  );
 }
 
 function verbSearchText(item) {
@@ -874,16 +888,21 @@ function verbSearchText(item) {
 }
 
 function verbNameMatchesTerm(item, term) {
-  const normalizedTerm = normalizeVerbName(term);
-  const bareTerm = bareVerbName(term);
-  const normalizedVerb = normalizeVerbName(item.verb);
-  const bareVerb = bareVerbName(item.verb);
-  return (
-    normalizedTerm === normalizedVerb ||
-    normalizedTerm === bareVerb ||
-    bareTerm === normalizedVerb ||
-    bareTerm === bareVerb
-  );
+  const termForms = normalizedTermForms(term);
+  const termTargets = new Set([
+    ...termForms,
+    ...termForms.map((form) => form.replace(/^sich\s+/, ""))
+  ]);
+  const verbForms = normalizedTermForms(item.verb);
+  const bareVerbForms = verbForms.map((form) => form.replace(/^sich\s+/, ""));
+  const prepForms = normalizedTermForms(item.prep);
+  const itemTargets = new Set([...verbForms, ...bareVerbForms]);
+
+  [...verbForms, ...bareVerbForms].forEach((verbForm) => {
+    prepForms.forEach((prepForm) => itemTargets.add(`${verbForm} ${prepForm}`));
+  });
+
+  return Array.from(termTargets).some((termForm) => itemTargets.has(termForm));
 }
 
 function bulkVerbTerms(value = appState.verbSearch) {
