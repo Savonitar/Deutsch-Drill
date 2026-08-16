@@ -153,6 +153,21 @@ const VERB_ITEMS = [
     pattern: "verzichten auf + Akkusativ"
   },
   {
+    id: "ankommen-auf-akk",
+    verb: "ankommen",
+    prep: "auf",
+    caseKey: "akk",
+    sentence: "Es kommt ___ die Dauer an.",
+    sentences: [
+      "Es kommt ___ die Dauer an.",
+      "Bei der Entscheidung kommt es ___ deine Erfahrung an.",
+      "Ob wir fahren, kommt ___ das Wetter an.",
+      "Im Vorstellungsgespräch kommt es auch ___ einen guten Eindruck an.",
+      "Der Erfolg kommt oft ___ die richtige Vorbereitung an."
+    ],
+    pattern: "ankommen auf + Akkusativ"
+  },
+  {
     id: "arbeiten-an-dat",
     verb: "arbeiten",
     prep: "an",

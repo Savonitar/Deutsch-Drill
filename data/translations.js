@@ -243,6 +243,28 @@ const VERB_TRANSLATIONS = {
       sentence: "Tatlıdan vazgeçiyorum."
     }
   },
+  "ankommen-auf-akk": {
+    en: {
+      verb: "to depend",
+      meaning: "to depend on",
+      sentence: "It depends on the duration."
+    },
+    ru: {
+      verb: "зависеть",
+      meaning: "зависеть от",
+      sentence: "Это зависит от продолжительности."
+    },
+    uk: {
+      verb: "залежати",
+      meaning: "залежати від",
+      sentence: "Це залежить від тривалості."
+    },
+    tr: {
+      verb: "bağlı olmak",
+      meaning: "bir şeye bağlı olmak",
+      sentence: "Süreye bağlı."
+    }
+  },
   "arbeiten-an-dat": {
     en: {
       verb: "to work",
