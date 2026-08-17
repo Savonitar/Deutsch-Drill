@@ -275,6 +275,19 @@ vm.runInContext(`${app}
     );
   }
 
+  VERB_ITEMS.forEach((verbItem) => {
+    const patternOptions = verbPatternOptions(verbItem);
+    assert(patternOptions.includes(verbItem.pattern), "Pattern options should include answer: " + verbItem.id);
+    assert(
+      patternOptions.every((option) => option.startsWith(verbItem.verb + " ")),
+      "Pattern options should keep the prompt verb fixed: " + verbItem.id
+    );
+    assert(
+      patternOptions.some((option) => option !== verbItem.pattern),
+      "Pattern options should include distractors: " + verbItem.id
+    );
+  });
+
   appState.topic = "adjective";
   appState.adjMode = "form";
   appState.reviewOnly = false;
