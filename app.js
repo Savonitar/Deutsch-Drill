@@ -401,6 +401,7 @@ const STRONG_SINGULAR_NOUNS = [
 const PREPOSITIONS = Array.from(new Set(VERB_ITEMS.map((item) => item.prep))).sort((a, b) =>
   a.localeCompare(b, "de-DE")
 );
+const VERB_PATTERN_CASE_KEYS = Array.from(new Set(VERB_ITEMS.map((item) => item.caseKey)));
 const VERB_LOOKUP = new Map(VERB_ITEMS.map((item) => [item.id, item]));
 const VERB_IDS = new Set(VERB_LOOKUP.keys());
 
@@ -838,6 +839,33 @@ function isFavoritesActive(topic = appState.topic) {
 
 function verbPatternLabel(item) {
   return `${item.prep} + ${CASE_SHORT[item.caseKey]}`;
+}
+
+function verbPatternOption(item, prep, caseKey) {
+  return `${item.verb} ${prep} + ${CASES[caseKey]}`;
+}
+
+function verbPatternOptions(item) {
+  const options = new Set([item.pattern]);
+  const normalizedVerb = normalizeVerbName(item.verb);
+
+  VERB_ITEMS.filter(
+    (verbItem) => verbItem.id !== item.id && normalizeVerbName(verbItem.verb) === normalizedVerb
+  ).forEach((verbItem) => options.add(verbItem.pattern));
+
+  VERB_PATTERN_CASE_KEYS.filter((caseKey) => caseKey !== item.caseKey).forEach((caseKey) => {
+    options.add(verbPatternOption(item, item.prep, caseKey));
+  });
+
+  shuffle(
+    PREPOSITIONS.flatMap((prep) =>
+      VERB_PATTERN_CASE_KEYS.map((caseKey) => ({ prep, caseKey }))
+    ).filter(({ prep, caseKey }) => prep !== item.prep || caseKey !== item.caseKey)
+  ).forEach(({ prep, caseKey }) => {
+    options.add(verbPatternOption(item, prep, caseKey));
+  });
+
+  return shuffle(Array.from(options).slice(0, 4));
 }
 
 function normalizeSearch(value) {
@@ -1473,9 +1501,6 @@ function buildVerbExercise() {
   }
 
   if (mode === "pattern") {
-    const patterns = Array.from(new Set(VERB_ITEMS.map((verbItem) => verbItem.pattern)));
-    const distractors = shuffle(patterns.filter((pattern) => pattern !== item.pattern)).slice(0, 3);
-
     return {
       topic: "verbs",
       verbItemId: item.id,
@@ -1484,7 +1509,7 @@ function buildVerbExercise() {
       title: "Full verb pattern",
       prompt: completedSentence,
       answer: item.pattern,
-      options: shuffle([item.pattern, ...distractors]),
+      options: verbPatternOptions(item),
       meta: [
         ["Verb", item.verb],
         ["Meaning", translation.meaning],
