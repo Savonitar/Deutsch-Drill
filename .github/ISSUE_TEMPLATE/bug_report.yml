@@ -1,0 +1,30 @@
+name: Bug report
+description: Tell me what went wrong in Deutsch Drill.
+title: "[Bug]: "
+labels: ["bug"]
+body:
+  - type: markdown
+    attributes:
+      value: Thanks for helping improve Deutsch Drill.
+  - type: textarea
+    id: problem
+    attributes:
+      label: What happened?
+      description: Describe the bug and what you expected to happen instead.
+      placeholder: I clicked ... and saw ...
+    validations:
+      required: true
+  - type: textarea
+    id: steps
+    attributes:
+      label: How can I reproduce it?
+      description: List the smallest set of steps that shows the problem.
+      placeholder: |
+        1. Open ...
+        2. Choose ...
+        3. Click ...
+  - type: input
+    id: device
+    attributes:
+      label: Browser or device
+      placeholder: Chrome on macOS, Safari on iPhone, Firefox on Windows...
