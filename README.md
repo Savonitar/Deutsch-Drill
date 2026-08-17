@@ -33,6 +33,14 @@ Progress is stored locally in the browser with `localStorage`.
 - Verb translations in English, Russian, Ukrainian, and Turkish for the starter set
 - Mistake-history review for repeated practice
 
+## Feedback
+
+Found a bug or have an idea?
+
+- [Report a bug](https://github.com/Savonitar/Deutsch-Drill/issues/new?template=bug_report.yml)
+- [Request a feature](https://github.com/Savonitar/Deutsch-Drill/issues/new?template=feature_request.yml)
+- [Star the project](https://github.com/Savonitar/Deutsch-Drill) if Deutsch Drill is useful to you
+
 ## Checks
 
 Run the no-dependency app checks with:
