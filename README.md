@@ -12,6 +12,7 @@ A static German training page for:
 
 - adjective declension
 - verbs with prepositions
+- modal verb conjugation
 
 The app has no backend, no external requests, and no scraped dictionary data.
 Exercise data is stored locally in `app.js` and the static files under `data/`.
@@ -31,6 +32,10 @@ Progress is stored locally in the browser with `localStorage`.
 - Favourite drills with saved-list replay by topic
 - Immediate answer scoring for verb practice
 - Verb translations in English, Russian, Ukrainian, and Turkish for the starter set
+- Modal verb conjugation across Präsens, Präteritum, and Konjunktiv II
+- Modal verb filters for verb, grammatical form, and person
+- Modal verb meanings and learning notes in English, Russian, Ukrainian, and Turkish
+- Modal conjugation and infinitive-recognition drills
 - Mistake-history review for repeated practice
 
 ## Feedback
