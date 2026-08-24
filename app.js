@@ -7,15 +7,20 @@ const FAVORITES_KEY = "deutsch-drill-favourites-v1";
 const UI_PREFERENCES_KEY = "deutsch-drill-ui-preferences-v1";
 const VERB_SENTENCE_COOLDOWN = 8;
 
-const TOPICS = ["adjective", "verbs"];
+const TOPICS = ["adjective", "verbs", "modals"];
 const ADJECTIVE_MODES = ["form", "ending", "case", "article", "gender"];
 const ADJECTIVE_FILTERS = ["all", "definite", "mixed", "strong"];
 const VERB_MODES = ["prep", "case", "pattern"];
+const MODAL_MODES = ["form", "infinitive"];
 const DEFAULT_UI_PREFERENCES = {
   topic: "adjective",
   adjMode: "form",
   adjFilter: "all",
-  verbMode: "prep"
+  verbMode: "prep",
+  modalMode: "form",
+  modalVerbFilter: "all",
+  modalFormFilter: "all",
+  modalPersonFilter: "all"
 };
 
 const CASES = {
@@ -404,6 +409,12 @@ const PREPOSITIONS = Array.from(new Set(VERB_ITEMS.map((item) => item.prep))).so
 const VERB_PATTERN_CASE_KEYS = Array.from(new Set(VERB_ITEMS.map((item) => item.caseKey)));
 const VERB_LOOKUP = new Map(VERB_ITEMS.map((item) => [item.id, item]));
 const VERB_IDS = new Set(VERB_LOOKUP.keys());
+const MODAL_VERB_LOOKUP = new Map(MODAL_VERBS.map((item) => [item.id, item]));
+const MODAL_FORM_LOOKUP = new Map(MODAL_FORM_DEFINITIONS.map((item) => [item.id, item]));
+const MODAL_PERSON_LOOKUP = new Map(MODAL_PERSON_DEFINITIONS.map((item) => [item.id, item]));
+const MODAL_VERB_FILTERS = ["all", ...MODAL_VERB_LOOKUP.keys()];
+const MODAL_FORM_FILTERS = ["all", ...MODAL_FORM_LOOKUP.keys()];
+const MODAL_PERSON_FILTERS = ["all", ...MODAL_PERSON_LOOKUP.keys()];
 
 const TRANSLATION_LANGUAGES = {
   en: "English",
@@ -422,6 +433,11 @@ const elements = {
   dataBadge: document.querySelector("#dataBadge"),
   favoriteButton: document.querySelector("#favoriteButton"),
   controlsRow: document.querySelector("#controlsRow"),
+  modalFilters: document.querySelector("#modalFilters"),
+  modalFilterSummary: document.querySelector("#modalFilterSummary"),
+  modalVerbFilter: document.querySelector("#modalVerbFilter"),
+  modalFormFilter: document.querySelector("#modalFormFilter"),
+  modalPersonFilter: document.querySelector("#modalPersonFilter"),
   metaGrid: document.querySelector("#metaGrid"),
   promptText: document.querySelector("#promptText"),
   answerGrid: document.querySelector("#answerGrid"),
@@ -436,6 +452,7 @@ const elements = {
   topicMissed: document.querySelector("#topicMissed"),
   bestStreak: document.querySelector("#bestStreak"),
   missList: document.querySelector("#missList"),
+  translationSettingsBlock: document.querySelector("#translationSettingsBlock"),
   verbListBlock: document.querySelector("#verbListBlock"),
   verbListCount: document.querySelector("#verbListCount"),
   verbListToggle: document.querySelector("#verbListToggle"),
@@ -460,6 +477,10 @@ const appState = {
   adjMode: uiPreferences.adjMode,
   adjFilter: uiPreferences.adjFilter,
   verbMode: uiPreferences.verbMode,
+  modalMode: uiPreferences.modalMode,
+  modalVerbFilter: uiPreferences.modalVerbFilter,
+  modalFormFilter: uiPreferences.modalFormFilter,
+  modalPersonFilter: uiPreferences.modalPersonFilter,
   verbSearch: "",
   verbBulkStatus: "",
   translationLanguage: loadTranslationLanguage(),
@@ -563,7 +584,19 @@ function sanitizeUiPreferences(saved) {
       : DEFAULT_UI_PREFERENCES.adjFilter,
     verbMode: VERB_MODES.includes(saved.verbMode)
       ? saved.verbMode
-      : DEFAULT_UI_PREFERENCES.verbMode
+      : DEFAULT_UI_PREFERENCES.verbMode,
+    modalMode: MODAL_MODES.includes(saved.modalMode)
+      ? saved.modalMode
+      : DEFAULT_UI_PREFERENCES.modalMode,
+    modalVerbFilter: MODAL_VERB_FILTERS.includes(saved.modalVerbFilter)
+      ? saved.modalVerbFilter
+      : DEFAULT_UI_PREFERENCES.modalVerbFilter,
+    modalFormFilter: MODAL_FORM_FILTERS.includes(saved.modalFormFilter)
+      ? saved.modalFormFilter
+      : DEFAULT_UI_PREFERENCES.modalFormFilter,
+    modalPersonFilter: MODAL_PERSON_FILTERS.includes(saved.modalPersonFilter)
+      ? saved.modalPersonFilter
+      : DEFAULT_UI_PREFERENCES.modalPersonFilter
   };
 }
 
@@ -574,7 +607,11 @@ function saveUiPreferences() {
       topic: appState.topic,
       adjMode: appState.adjMode,
       adjFilter: appState.adjFilter,
-      verbMode: appState.verbMode
+      verbMode: appState.verbMode,
+      modalMode: appState.modalMode,
+      modalVerbFilter: appState.modalVerbFilter,
+      modalFormFilter: appState.modalFormFilter,
+      modalPersonFilter: appState.modalPersonFilter
     })
   );
 }
@@ -598,7 +635,7 @@ function loadFavorites() {
 function emptyFavorites() {
   return {
     items: [],
-    useFavorites: { adjective: false, verbs: false }
+    useFavorites: { adjective: false, verbs: false, modals: false }
   };
 }
 
@@ -615,19 +652,20 @@ function sanitizeFavoriteUsage(value, items) {
   const counts = favoriteCountsByTopic(items);
   return {
     adjective: Boolean(value?.adjective) && counts.adjective > 0,
-    verbs: Boolean(value?.verbs) && counts.verbs > 0
+    verbs: Boolean(value?.verbs) && counts.verbs > 0,
+    modals: Boolean(value?.modals) && counts.modals > 0
   };
 }
 
 function favoriteCountsByTopic(items) {
   return items.reduce(
     (counts, favorite) => {
-      if (favorite.topic === "adjective" || favorite.topic === "verbs") {
+      if (TOPICS.includes(favorite.topic)) {
         counts[favorite.topic] += 1;
       }
       return counts;
     },
-    { adjective: 0, verbs: 0 }
+    { adjective: 0, verbs: 0, modals: 0 }
   );
 }
 
@@ -661,9 +699,15 @@ function sanitizeFavorite(favorite) {
 }
 
 function sanitizeExerciseSnapshot(exercise) {
+  const hasValidModalKeys =
+    exercise?.topic !== "modals" ||
+    (MODAL_VERB_LOOKUP.has(exercise.modalVerbId) &&
+      MODAL_FORM_LOOKUP.has(exercise.modalForm) &&
+      MODAL_PERSON_LOOKUP.has(exercise.modalPerson));
   if (
     !exercise ||
-    (exercise.topic !== "adjective" && exercise.topic !== "verbs") ||
+    !TOPICS.includes(exercise.topic) ||
+    !hasValidModalKeys ||
     typeof exercise.id !== "string" ||
     typeof exercise.title !== "string" ||
     typeof exercise.prompt !== "string" ||
@@ -679,6 +723,10 @@ function sanitizeExerciseSnapshot(exercise) {
     topic: exercise.topic,
     verbItemId: exercise.verbItemId,
     verbSentence: exercise.verbSentence,
+    modalVerbId: exercise.modalVerbId,
+    modalForm: exercise.modalForm,
+    modalPerson: exercise.modalPerson,
+    modalSubject: exercise.modalSubject,
     id: exercise.id,
     title: exercise.title,
     prompt: exercise.prompt,
@@ -688,7 +736,8 @@ function sanitizeExerciseSnapshot(exercise) {
       .filter((row) => Array.isArray(row) && row.length >= 2)
       .map(([label, value]) => [String(label), String(value)])
       .filter(([label]) => label !== "Review" && label !== "Favourite"),
-    explanation: String(exercise.explanation || "")
+    explanation: String(exercise.explanation || ""),
+    revealTranslationAfterAnswer: Boolean(exercise.revealTranslationAfterAnswer)
   };
 }
 
@@ -786,9 +835,44 @@ function verbTranslationFor(item, sentence = item.sentence) {
   return {
     language,
     languageLabel: TRANSLATION_LANGUAGES[language],
+    source: item.verb,
     verb: entry.verb || item.verb,
     meaning: entry.meaning || verbMeaningFor(item),
     sentence: entry.sentence || ""
+  };
+}
+
+function availableModalTranslation(item, language) {
+  const translations = MODAL_TRANSLATIONS[item.id] || {};
+  if (translations[language]) {
+    return { language, entry: translations[language] };
+  }
+  if (translations.en) {
+    return { language: "en", entry: translations.en };
+  }
+  return { language, entry: {} };
+}
+
+function modalTranslationFor(item, formId) {
+  const requestedLanguage = Object.prototype.hasOwnProperty.call(
+    TRANSLATION_LANGUAGES,
+    appState.translationLanguage
+  )
+    ? appState.translationLanguage
+    : "en";
+  const { language, entry } = availableModalTranslation(item, requestedLanguage);
+  const englishEntry = MODAL_TRANSLATIONS[item.id]?.en || {};
+  return {
+    language,
+    languageLabel: TRANSLATION_LANGUAGES[language],
+    source: item.infinitive,
+    verb: entry.verb || englishEntry.verb || item.infinitive,
+    meaning:
+      entry.meanings?.[formId] ||
+      englishEntry.meanings?.[formId] ||
+      entry.verb ||
+      item.infinitive,
+    note: entry.note || englishEntry.note || ""
   };
 }
 
@@ -1085,6 +1169,26 @@ function refreshCurrentVerbTranslation() {
   );
 }
 
+function refreshCurrentModalTranslation() {
+  if (appState.topic !== "modals" || !appState.current?.modalVerbId) {
+    return;
+  }
+  const item = MODAL_VERB_LOOKUP.get(appState.current.modalVerbId);
+  if (!item || !MODAL_FORM_LOOKUP.has(appState.current.modalForm)) {
+    return;
+  }
+  const translation = modalTranslationFor(item, appState.current.modalForm);
+  appState.current.translation = translation;
+  appState.current.meta = appState.current.meta.map(([label, value]) =>
+    label === "Meaning" ? [label, translation.meaning] : [label, value]
+  );
+}
+
+function refreshCurrentTranslation() {
+  refreshCurrentVerbTranslation();
+  refreshCurrentModalTranslation();
+}
+
 function refreshAfterTrainingListChange(advance) {
   if (advance && appState.topic === "verbs" && !appState.reviewOnly) {
     nextExercise();
@@ -1137,50 +1241,62 @@ function exerciseSnapshot(exercise) {
     topic: exercise.topic,
     verbItemId: exercise.verbItemId,
     verbSentence: exercise.verbSentence,
+    modalVerbId: exercise.modalVerbId,
+    modalForm: exercise.modalForm,
+    modalPerson: exercise.modalPerson,
+    modalSubject: exercise.modalSubject,
     id: exercise.id,
     title: exercise.title,
     prompt: exercise.prompt,
     answer: exercise.answer,
     options: [...exercise.options],
     meta: exercise.meta.filter(([label]) => label !== "Review" && label !== "Favourite"),
-    explanation: exercise.explanation
+    explanation: exercise.explanation,
+    revealTranslationAfterAnswer: Boolean(exercise.revealTranslationAfterAnswer)
   };
 }
 
+function addExerciseTranslation(exercise) {
+  let translation = null;
+  if (exercise.verbItemId && VERB_LOOKUP.has(exercise.verbItemId)) {
+    const item = VERB_LOOKUP.get(exercise.verbItemId);
+    translation = verbTranslationFor(item, exercise.verbSentence || item.sentence);
+  } else if (
+    exercise.modalVerbId &&
+    MODAL_VERB_LOOKUP.has(exercise.modalVerbId) &&
+    MODAL_FORM_LOOKUP.has(exercise.modalForm)
+  ) {
+    translation = modalTranslationFor(
+      MODAL_VERB_LOOKUP.get(exercise.modalVerbId),
+      exercise.modalForm
+    );
+  }
+
+  if (translation) {
+    exercise.translation = translation;
+    exercise.meta = exercise.meta.map(([label, value]) =>
+      label === "Meaning" ? [label, translation.meaning] : [label, value]
+    );
+  }
+  return exercise;
+}
+
 function exerciseFromMistake(miss) {
-  const exercise = {
+  return addExerciseTranslation({
     ...miss.exercise,
     options: [...miss.exercise.options],
     meta: [["Review", miss.resolved ? "Mistake history" : "Active mistake"], ...miss.exercise.meta],
     reviewSignature: miss.signature
-  };
-  if (exercise.verbItemId && VERB_LOOKUP.has(exercise.verbItemId)) {
-    const item = VERB_LOOKUP.get(exercise.verbItemId);
-    const translation = verbTranslationFor(item, exercise.verbSentence || item.sentence);
-    exercise.translation = translation;
-    exercise.meta = exercise.meta.map(([label, value]) =>
-      label === "Meaning" ? [label, translation.meaning] : [label, value]
-    );
-  }
-  return exercise;
+  });
 }
 
 function exerciseFromFavorite(favorite) {
-  const exercise = {
+  return addExerciseTranslation({
     ...favorite.exercise,
     options: [...favorite.exercise.options],
     meta: [["Favourite", "Saved drill"], ...favorite.exercise.meta],
     favoriteSignature: favorite.signature
-  };
-  if (exercise.verbItemId && VERB_LOOKUP.has(exercise.verbItemId)) {
-    const item = VERB_LOOKUP.get(exercise.verbItemId);
-    const translation = verbTranslationFor(item, exercise.verbSentence || item.sentence);
-    exercise.translation = translation;
-    exercise.meta = exercise.meta.map(([label, value]) =>
-      label === "Meaning" ? [label, translation.meaning] : [label, value]
-    );
-  }
-  return exercise;
+  });
 }
 
 function currentFavoriteIndex() {
@@ -1543,8 +1659,125 @@ function buildVerbExercise() {
   };
 }
 
+function modalFilterMatches(value, activeFilter) {
+  return activeFilter === "all" || value === activeFilter;
+}
+
+function activeModalCandidates() {
+  return MODAL_VERBS.flatMap((item) =>
+    MODAL_FORM_DEFINITIONS.flatMap((form) =>
+      MODAL_PERSON_DEFINITIONS.map((person) => ({ item, form, person }))
+    )
+  ).filter(
+    ({ item, form, person }) =>
+      modalFilterMatches(item.id, appState.modalVerbFilter) &&
+      modalFilterMatches(form.id, appState.modalFormFilter) &&
+      modalFilterMatches(person.id, appState.modalPersonFilter)
+  );
+}
+
+function modalAnswerFor(item, form, person) {
+  return item.forms[form.id][person.formIndex];
+}
+
+function modalExerciseWeight({ item, form, person }) {
+  const stats = getItemStats(
+    `modal:${appState.modalMode}:${item.id}:${form.id}:${person.id}`
+  );
+  return Math.max(1, 6 - stats.mastery);
+}
+
+function modalFormOptions(item, form, person) {
+  const answer = modalAnswerFor(item, form, person);
+  const candidates = [
+    ...MODAL_FORM_DEFINITIONS.map((candidateForm) =>
+      modalAnswerFor(item, candidateForm, person)
+    ),
+    ...MODAL_PERSON_DEFINITIONS.map((candidatePerson) =>
+      modalAnswerFor(item, form, candidatePerson)
+    ),
+    ...MODAL_VERBS.map((candidateItem) => modalAnswerFor(candidateItem, form, person))
+  ];
+  const distractors = shuffle(
+    Array.from(new Set(candidates)).filter((candidate) => candidate !== answer)
+  ).slice(0, 3);
+  return shuffle([answer, ...distractors]);
+}
+
+function modalInfinitiveOptions(item) {
+  const distractors = shuffle(
+    MODAL_VERBS.filter((candidate) => candidate.id !== item.id).map(
+      (candidate) => candidate.infinitive
+    )
+  ).slice(0, 3);
+  return shuffle([item.infinitive, ...distractors]);
+}
+
+function buildModalExercise() {
+  const candidates = activeModalCandidates();
+  const weighted = candidates.flatMap((candidate) =>
+    Array.from({ length: modalExerciseWeight(candidate) }, () => candidate)
+  );
+  const { item, form, person } = sample(weighted);
+  const subject = sample(person.subjects);
+  const answer = modalAnswerFor(item, form, person);
+  const prompt = item.contexts[form.id].replace("{subject}", subject);
+  const translation = modalTranslationFor(item, form.id);
+  const note = item.notes?.[form.id] || "";
+  const explanation = `${person.label} · ${item.infinitive} · ${form.label} → ${answer}.${
+    note ? ` ${note}` : ""
+  }`;
+  const base = {
+    topic: "modals",
+    modalVerbId: item.id,
+    modalForm: form.id,
+    modalPerson: person.id,
+    modalSubject: subject,
+    id: `modal:${appState.modalMode}:${item.id}:${form.id}:${person.id}`,
+    translation,
+    explanation
+  };
+
+  if (appState.modalMode === "infinitive") {
+    return {
+      ...base,
+      title: "Find the infinitive",
+      prompt: prompt.replace("___", answer),
+      answer: item.infinitive,
+      options: modalInfinitiveOptions(item),
+      meta: [
+        ["Form", form.label],
+        ["Person", person.label],
+        ["Conjugated", answer],
+        ["Focus", "Infinitive"]
+      ],
+      revealTranslationAfterAnswer: true
+    };
+  }
+
+  return {
+    ...base,
+    title: "Modal verb form",
+    prompt,
+    answer,
+    options: modalFormOptions(item, form, person),
+    meta: [
+      ["Verb", item.infinitive],
+      ["Form", form.label],
+      ["Person", person.label],
+      ["Meaning", translation.meaning]
+    ]
+  };
+}
+
 function buildStandardExercise() {
-  return appState.topic === "adjective" ? buildAdjectiveExercise() : buildVerbExercise();
+  if (appState.topic === "adjective") {
+    return buildAdjectiveExercise();
+  }
+  if (appState.topic === "verbs") {
+    return buildVerbExercise();
+  }
+  return buildModalExercise();
 }
 
 function nextExercise() {
@@ -1587,7 +1820,9 @@ function render() {
   renderHeaderStats();
   renderTopicChrome();
   renderControls();
+  renderModalFilters();
   renderQuestion();
+  renderTranslationSettings();
   renderVerbTrainingList();
   renderFavoriteList();
   renderTopicStats();
@@ -1611,38 +1846,50 @@ function renderTopicChrome() {
     elements.topicKicker.textContent = "Cases, gender, article type";
     elements.topicTitle.textContent = "Adjective ending";
     elements.dataBadge.textContent = `${NOUNS.length + STRONG_SINGULAR_NOUNS.length} nouns, ${ADJECTIVES.length} adjectives`;
-  } else {
+  } else if (appState.topic === "verbs") {
     const selectedCount = selectedVerbIds().length;
     elements.topicKicker.textContent = "Preposition plus case";
     elements.topicTitle.textContent = "Verb pattern";
     elements.dataBadge.textContent = isVerbListActive()
       ? `${selectedCount} selected of ${VERB_ITEMS.length} patterns`
       : `${VERB_ITEMS.length} authored patterns`;
+  } else {
+    elements.topicKicker.textContent = "Person, tense, and mood";
+    elements.topicTitle.textContent = "Modal verb conjugation";
+    elements.dataBadge.textContent = `${MODAL_VERBS.length} verbs · ${MODAL_FORM_DEFINITIONS.length} forms · ${MODAL_PERSON_DEFINITIONS.length} person groups`;
   }
 }
 
 function renderControls() {
   elements.controlsRow.replaceChildren();
-  const controls =
-    appState.topic === "adjective"
-      ? [
-          ["mode", "form", "Full word"],
-          ["mode", "ending", "Ending only"],
-          ["mode", "case", "Case"],
-          ["mode", "article", "Article type"],
-          ["mode", "gender", "Gender"],
-          ["review", "mistakes", "Mistakes"],
-          ["filter", "all", "All"],
-          ["filter", "definite", "der/die/das"],
-          ["filter", "mixed", "ein/kein/mein"],
-          ["filter", "strong", "No article"]
-        ]
-      : [
-          ["mode", "prep", "Preposition"],
-          ["mode", "case", "Case"],
-          ["mode", "pattern", "Pattern"],
-          ["review", "mistakes", "Mistakes"]
-        ];
+  let controls;
+  if (appState.topic === "adjective") {
+    controls = [
+      ["mode", "form", "Full word"],
+      ["mode", "ending", "Ending only"],
+      ["mode", "case", "Case"],
+      ["mode", "article", "Article type"],
+      ["mode", "gender", "Gender"],
+      ["review", "mistakes", "Mistakes"],
+      ["filter", "all", "All"],
+      ["filter", "definite", "der/die/das"],
+      ["filter", "mixed", "ein/kein/mein"],
+      ["filter", "strong", "No article"]
+    ];
+  } else if (appState.topic === "verbs") {
+    controls = [
+      ["mode", "prep", "Preposition"],
+      ["mode", "case", "Case"],
+      ["mode", "pattern", "Pattern"],
+      ["review", "mistakes", "Mistakes"]
+    ];
+  } else {
+    controls = [
+      ["mode", "form", "Conjugation"],
+      ["mode", "infinitive", "Find infinitive"],
+      ["review", "mistakes", "Mistakes"]
+    ];
+  }
 
   controls.forEach(([kind, value, label]) => {
     const button = document.createElement("button");
@@ -1650,14 +1897,18 @@ function renderControls() {
     button.className = "filter-button";
     button.textContent = label;
     button.disabled = kind === "review" && !hasTopicMisses();
-    const active =
-      appState.topic === "adjective"
-        ? (kind === "review" && appState.reviewOnly) ||
-          (kind === "mode" && appState.adjMode === value) ||
-          (kind === "filter" && appState.adjFilter === value)
-        : (kind === "review" && appState.reviewOnly) ||
-          (kind === "mode" && appState.verbMode === value);
+    let active = kind === "review" && appState.reviewOnly;
+    if (appState.topic === "adjective") {
+      active ||=
+        (kind === "mode" && appState.adjMode === value) ||
+        (kind === "filter" && appState.adjFilter === value);
+    } else if (appState.topic === "verbs") {
+      active ||= kind === "mode" && appState.verbMode === value;
+    } else {
+      active ||= kind === "mode" && appState.modalMode === value;
+    }
     button.classList.toggle("active", active);
+    button.setAttribute("aria-pressed", String(active));
     button.addEventListener("click", () => {
       if (kind === "review") {
         appState.reviewOnly = !appState.reviewOnly;
@@ -1674,17 +1925,44 @@ function renderControls() {
         } else {
           appState.adjFilter = value;
         }
-      } else {
+      } else if (appState.topic === "verbs") {
         appState.reviewOnly = false;
         appState.favorites.useFavorites[appState.topic] = false;
         saveFavorites();
         appState.verbMode = value;
+      } else {
+        appState.reviewOnly = false;
+        appState.favorites.useFavorites[appState.topic] = false;
+        saveFavorites();
+        appState.modalMode = value;
       }
       saveUiPreferences();
       nextExercise();
     });
     elements.controlsRow.append(button);
   });
+}
+
+function renderModalFilters() {
+  const isModalTopic = appState.topic === "modals";
+  elements.modalFilters.classList.toggle("hidden", !isModalTopic);
+  if (!isModalTopic) {
+    return;
+  }
+  elements.modalVerbFilter.value = appState.modalVerbFilter;
+  elements.modalFormFilter.value = appState.modalFormFilter;
+  elements.modalPersonFilter.value = appState.modalPersonFilter;
+  elements.modalFilterSummary.textContent = `${activeModalCandidates().length} of ${
+    MODAL_VERBS.length * MODAL_FORM_DEFINITIONS.length * MODAL_PERSON_DEFINITIONS.length
+  } combinations`;
+}
+
+function renderTranslationSettings() {
+  const supportsTranslation = appState.topic === "verbs" || appState.topic === "modals";
+  elements.translationSettingsBlock.classList.toggle("hidden", !supportsTranslation);
+  if (supportsTranslation) {
+    elements.translationLanguage.value = appState.translationLanguage;
+  }
 }
 
 function renderQuestion() {
@@ -1728,7 +2006,7 @@ function renderQuestion() {
         return;
       }
       appState.selected = option;
-      if (appState.topic === "verbs") {
+      if (appState.topic === "verbs" || appState.topic === "modals") {
         submitAnswer();
       } else {
         renderQuestion();
@@ -1745,18 +2023,24 @@ function renderQuestion() {
 
 function renderTranslationPanel(exercise) {
   elements.translationPanel.replaceChildren();
-  elements.translationPanel.classList.toggle("hidden", !exercise.translation);
-  if (!exercise.translation) {
+  const shouldReveal = !exercise.revealTranslationAfterAnswer || appState.answered;
+  elements.translationPanel.classList.toggle("hidden", !exercise.translation || !shouldReveal);
+  if (!exercise.translation || !shouldReveal) {
     return;
   }
 
+  const source =
+    exercise.meta.find(([label]) => label === "Verb")?.[1] || exercise.translation.source || "";
   const rows = [
     ["Language", exercise.translation.languageLabel],
-    ["Verb", `${exercise.meta.find(([label]) => label === "Verb")?.[1] || ""} = ${exercise.translation.verb}`],
+    ["Verb", `${source} = ${exercise.translation.verb}`],
     ["Meaning", exercise.translation.meaning]
   ];
   if (exercise.translation.sentence) {
     rows.push(["Example", exercise.translation.sentence]);
+  }
+  if (exercise.translation.note) {
+    rows.push(["Note", exercise.translation.note]);
   }
 
   rows.forEach(([label, value]) => {
@@ -1772,14 +2056,14 @@ function renderTranslationPanel(exercise) {
 }
 
 function renderQuestionActions() {
-  const isVerbTopic = appState.topic === "verbs";
-  elements.submitButton.classList.toggle("hidden", isVerbTopic || appState.answered);
-  elements.resetButton.classList.toggle("hidden", isVerbTopic);
+  const isImmediateTopic = appState.topic === "verbs" || appState.topic === "modals";
+  elements.submitButton.classList.toggle("hidden", isImmediateTopic || appState.answered);
+  elements.resetButton.classList.toggle("hidden", isImmediateTopic);
   elements.nextButton.classList.toggle("hidden", !appState.answered);
-  elements.submitButton.disabled = isVerbTopic;
-  elements.resetButton.disabled = isVerbTopic;
+  elements.submitButton.disabled = isImmediateTopic;
+  elements.resetButton.disabled = isImmediateTopic;
   elements.nextButton.disabled = false;
-  elements.nextButton.parentElement?.classList.toggle("verb-actions", isVerbTopic);
+  elements.nextButton.parentElement?.classList.toggle("immediate-actions", isImmediateTopic);
 }
 
 function renderTopicStats() {
@@ -2034,6 +2318,36 @@ elements.verbBulkAdd.addEventListener("click", addBulkVerbMatches);
 elements.verbListToggle.addEventListener("change", (event) => {
   setVerbListEnabled(event.target.checked);
 });
+elements.modalVerbFilter.addEventListener("change", (event) => {
+  appState.modalVerbFilter = MODAL_VERB_FILTERS.includes(event.target.value)
+    ? event.target.value
+    : "all";
+  appState.reviewOnly = false;
+  appState.favorites.useFavorites.modals = false;
+  saveFavorites();
+  saveUiPreferences();
+  nextExercise();
+});
+elements.modalFormFilter.addEventListener("change", (event) => {
+  appState.modalFormFilter = MODAL_FORM_FILTERS.includes(event.target.value)
+    ? event.target.value
+    : "all";
+  appState.reviewOnly = false;
+  appState.favorites.useFavorites.modals = false;
+  saveFavorites();
+  saveUiPreferences();
+  nextExercise();
+});
+elements.modalPersonFilter.addEventListener("change", (event) => {
+  appState.modalPersonFilter = MODAL_PERSON_FILTERS.includes(event.target.value)
+    ? event.target.value
+    : "all";
+  appState.reviewOnly = false;
+  appState.favorites.useFavorites.modals = false;
+  saveFavorites();
+  saveUiPreferences();
+  nextExercise();
+});
 elements.translationLanguage.addEventListener("change", (event) => {
   appState.translationLanguage = Object.prototype.hasOwnProperty.call(
     TRANSLATION_LANGUAGES,
@@ -2042,7 +2356,7 @@ elements.translationLanguage.addEventListener("change", (event) => {
     ? event.target.value
     : "en";
   saveTranslationLanguage();
-  refreshCurrentVerbTranslation();
+  refreshCurrentTranslation();
   render();
 });
 elements.verbListClear.addEventListener("click", clearVerbTrainingList);

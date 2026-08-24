@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <meta
       name="description"
-      content="Static German practice for adjective declension and verbs with prepositions."
+      content="Static German practice for adjective declension, verbs with prepositions, and modal verbs."
     >
     <title>Deutsch Drill</title>
     <link rel="icon" href="assets/deutsch-drill-logo.png" type="image/png">
@@ -50,6 +50,9 @@
         </button>
         <button class="tab-button" type="button" data-topic="verbs">
           Verben mit Präpositionen
+        </button>
+        <button class="tab-button" type="button" data-topic="modals">
+          Modalverben
         </button>
       </nav>
 
@@ -102,6 +105,51 @@
 
           <div class="controls-row" id="controlsRow"></div>
 
+          <section class="modal-filters hidden" id="modalFilters" aria-labelledby="modalFiltersTitle">
+            <div class="modal-filter-heading">
+              <div>
+                <span class="topic-kicker">Practice scope</span>
+                <h3 id="modalFiltersTitle">Modal verb filters</h3>
+              </div>
+              <span id="modalFilterSummary">All combinations</span>
+            </div>
+            <div class="modal-filter-grid">
+              <div class="select-field">
+                <label for="modalVerbFilter">Modal verb</label>
+                <select id="modalVerbFilter">
+                  <option value="all">All modal verbs</option>
+                  <option value="duerfen">dürfen</option>
+                  <option value="koennen">können</option>
+                  <option value="moegen">mögen / möchten</option>
+                  <option value="muessen">müssen</option>
+                  <option value="sollen">sollen</option>
+                  <option value="wollen">wollen</option>
+                </select>
+              </div>
+              <div class="select-field">
+                <label for="modalFormFilter">Grammatical form</label>
+                <select id="modalFormFilter">
+                  <option value="all">All forms</option>
+                  <option value="present">Präsens</option>
+                  <option value="preterite">Präteritum</option>
+                  <option value="subjunctive2">Konjunktiv II</option>
+                </select>
+              </div>
+              <div class="select-field">
+                <label for="modalPersonFilter">Person</label>
+                <select id="modalPersonFilter">
+                  <option value="all">All persons</option>
+                  <option value="ich">ich</option>
+                  <option value="du">du</option>
+                  <option value="erSieEs">er/sie/es</option>
+                  <option value="wir">wir</option>
+                  <option value="ihr">ihr</option>
+                  <option value="sieSie">sie/Sie</option>
+                </select>
+              </div>
+            </div>
+          </section>
+
           <article class="question-box" aria-live="polite">
             <div class="meta-grid" id="metaGrid"></div>
             <p class="prompt" id="promptText"></p>
@@ -144,6 +192,19 @@
             </dl>
           </section>
 
+          <section class="stat-block translation-settings-block hidden" id="translationSettingsBlock">
+            <h3>Translation</h3>
+            <div class="select-field">
+              <label for="translationLanguage">Language</label>
+              <select id="translationLanguage">
+                <option value="en">English</option>
+                <option value="ru">Русский</option>
+                <option value="uk">Українська</option>
+                <option value="tr">Türkçe</option>
+              </select>
+            </div>
+          </section>
+
           <section class="stat-block verb-list-block hidden" id="verbListBlock">
             <div class="section-title-row">
               <h3>Training list</h3>
@@ -153,15 +214,6 @@
               <input type="checkbox" id="verbListToggle">
               <span>Train selected</span>
             </label>
-            <div class="select-field">
-              <label for="translationLanguage">Translation</label>
-              <select id="translationLanguage">
-                <option value="en">English</option>
-                <option value="ru">Русский</option>
-                <option value="uk">Українська</option>
-                <option value="tr">Türkçe</option>
-              </select>
-            </div>
             <div class="search-field">
               <label for="verbSearchInput">Search</label>
               <textarea
@@ -208,7 +260,9 @@
     </main>
 
     <script src="data/verbs.js" defer></script>
+    <script src="data/modal-verbs.js" defer></script>
     <script src="data/translations.js" defer></script>
+    <script src="data/modal-translations.js" defer></script>
     <script src="app.js" defer></script>
   </body>
 </html>

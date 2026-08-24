@@ -1,7 +1,13 @@
 const fs = require("fs");
 const vm = require("vm");
 
-const dataScripts = ["data/verbs.js", "data/translations.js", "app.js"];
+const dataScripts = [
+  "data/verbs.js",
+  "data/modal-verbs.js",
+  "data/translations.js",
+  "data/modal-translations.js",
+  "app.js"
+];
 const app = dataScripts.map((file) => fs.readFileSync(file, "utf8")).join("\n\n");
 const index = fs.readFileSync("index.html", "utf8");
 
@@ -58,20 +64,26 @@ function assert(condition, message) {
 }
 
 const verbDataScriptIndex = index.indexOf('src="data/verbs.js"');
+const modalDataScriptIndex = index.indexOf('src="data/modal-verbs.js"');
 const translationDataScriptIndex = index.indexOf('src="data/translations.js"');
+const modalTranslationScriptIndex = index.indexOf('src="data/modal-translations.js"');
 const appScriptIndex = index.indexOf('src="app.js"');
 assert(
   verbDataScriptIndex >= 0 &&
+    modalDataScriptIndex >= 0 &&
     translationDataScriptIndex >= 0 &&
+    modalTranslationScriptIndex >= 0 &&
     appScriptIndex >= 0 &&
-    verbDataScriptIndex < translationDataScriptIndex &&
-    translationDataScriptIndex < appScriptIndex,
+    verbDataScriptIndex < modalDataScriptIndex &&
+    modalDataScriptIndex < translationDataScriptIndex &&
+    translationDataScriptIndex < modalTranslationScriptIndex &&
+    modalTranslationScriptIndex < appScriptIndex,
   "Data scripts should load before app.js"
 );
 
 function makeHarness(initialStorage = {}) {
   const elements = new Map();
-  const topicButtons = ["adjective", "verbs"].map((topic) => {
+  const topicButtons = ["adjective", "verbs", "modals"].map((topic) => {
     const button = makeElement(`[data-topic=${topic}]`);
     button.dataset.topic = topic;
     return button;
@@ -216,6 +228,89 @@ vm.runInContext(`${app}
     assert(verbIds.has(id), "Translation references unknown verb id: " + id);
   }
 
+  const expectedModalForms = {
+    duerfen: {
+      present: ["darf", "darfst", "darf", "dürfen", "dürft", "dürfen"],
+      preterite: ["durfte", "durftest", "durfte", "durften", "durftet", "durften"],
+      subjunctive2: ["dürfte", "dürftest", "dürfte", "dürften", "dürftet", "dürften"]
+    },
+    koennen: {
+      present: ["kann", "kannst", "kann", "können", "könnt", "können"],
+      preterite: ["konnte", "konntest", "konnte", "konnten", "konntet", "konnten"],
+      subjunctive2: ["könnte", "könntest", "könnte", "könnten", "könntet", "könnten"]
+    },
+    moegen: {
+      present: ["mag", "magst", "mag", "mögen", "mögt", "mögen"],
+      preterite: ["mochte", "mochtest", "mochte", "mochten", "mochtet", "mochten"],
+      subjunctive2: ["möchte", "möchtest", "möchte", "möchten", "möchtet", "möchten"]
+    },
+    muessen: {
+      present: ["muss", "musst", "muss", "müssen", "müsst", "müssen"],
+      preterite: ["musste", "musstest", "musste", "mussten", "musstet", "mussten"],
+      subjunctive2: ["müsste", "müsstest", "müsste", "müssten", "müsstet", "müssten"]
+    },
+    sollen: {
+      present: ["soll", "sollst", "soll", "sollen", "sollt", "sollen"],
+      preterite: ["sollte", "solltest", "sollte", "sollten", "solltet", "sollten"],
+      subjunctive2: ["sollte", "solltest", "sollte", "sollten", "solltet", "sollten"]
+    },
+    wollen: {
+      present: ["will", "willst", "will", "wollen", "wollt", "wollen"],
+      preterite: ["wollte", "wolltest", "wollte", "wollten", "wolltet", "wollten"],
+      subjunctive2: ["wollte", "wolltest", "wollte", "wollten", "wolltet", "wollten"]
+    }
+  };
+  assert(MODAL_VERBS.length === 6, "There should be six core modal verbs");
+  assert(MODAL_FORM_DEFINITIONS.length === 3, "There should be three modal forms");
+  assert(MODAL_PERSON_DEFINITIONS.length === 6, "There should be six modal person groups");
+  assert(
+    MODAL_PERSON_DEFINITIONS.map((person) => person.label).join("|") ===
+      "ich|du|er/sie/es|wir|ihr|sie/Sie",
+    "Modal person labels should match the requested groups"
+  );
+  for (const item of MODAL_VERBS) {
+    assert(expectedModalForms[item.id], "Unexpected modal verb id: " + item.id);
+    for (const form of MODAL_FORM_DEFINITIONS) {
+      assert(
+        JSON.stringify(item.forms[form.id]) ===
+          JSON.stringify(expectedModalForms[item.id][form.id]),
+        "Incorrect modal paradigm: " + item.id + " " + form.id
+      );
+      assert(
+        (item.contexts[form.id].match(/___/g) || []).length === 1,
+        "Modal context should contain one blank: " + item.id + " " + form.id
+      );
+      assert(
+        item.contexts[form.id].includes("{subject}"),
+        "Modal context should contain a subject placeholder: " + item.id + " " + form.id
+      );
+    }
+    for (const language of translationLanguages) {
+      const translation = MODAL_TRANSLATIONS[item.id]?.[language];
+      assert(translation?.verb, "Missing modal verb translation: " + item.id + " " + language);
+      for (const form of MODAL_FORM_DEFINITIONS) {
+        assert(
+          translation.meanings?.[form.id],
+          "Missing modal form meaning: " + item.id + " " + language + " " + form.id
+        );
+      }
+    }
+  }
+  assert(
+    MODAL_VERB_LOOKUP.get("moegen").forms.subjunctive2[0] === "möchte",
+    "möchten should be taught as Konjunktiv II of mögen"
+  );
+  assert(
+    JSON.stringify(MODAL_VERB_LOOKUP.get("sollen").forms.preterite) ===
+      JSON.stringify(MODAL_VERB_LOOKUP.get("sollen").forms.subjunctive2),
+    "sollen should preserve identical Präteritum and Konjunktiv II forms"
+  );
+  assert(
+    JSON.stringify(MODAL_VERB_LOOKUP.get("wollen").forms.preterite) ===
+      JSON.stringify(MODAL_VERB_LOOKUP.get("wollen").forms.subjunctive2),
+    "wollen should preserve identical Präteritum and Konjunktiv II forms"
+  );
+
   assert(appState.topic === "adjective", "Default topic should be adjective practice");
   assert(appState.verbMode === "prep", "Default verb mode should be preposition practice");
   document
@@ -238,15 +333,87 @@ vm.runInContext(`${app}
   assert(loadedUiPreferences.adjMode === "ending", "Saved adjective mode should load");
   assert(loadedUiPreferences.adjFilter === "strong", "Saved adjective filter should load");
   assert(loadedUiPreferences.verbMode === "case", "Saved verb mode should load");
+  assert(loadedUiPreferences.modalMode === "form", "Old preferences should get modal defaults");
+  assert(
+    loadedUiPreferences.modalVerbFilter === "all" &&
+      loadedUiPreferences.modalFormFilter === "all" &&
+      loadedUiPreferences.modalPersonFilter === "all",
+    "Old preferences should get safe modal filter defaults"
+  );
   localStorage.setItem(
     UI_PREFERENCES_KEY,
-    JSON.stringify({ topic: "bad", adjMode: "bad", adjFilter: "bad", verbMode: "bad" })
+    JSON.stringify({
+      topic: "modals",
+      adjMode: "form",
+      adjFilter: "all",
+      verbMode: "prep",
+      modalMode: "infinitive",
+      modalVerbFilter: "moegen",
+      modalFormFilter: "subjunctive2",
+      modalPersonFilter: "du"
+    })
+  );
+  const loadedModalPreferences = loadUiPreferences();
+  assert(loadedModalPreferences.topic === "modals", "Saved modal topic should load");
+  assert(loadedModalPreferences.modalMode === "infinitive", "Saved modal mode should load");
+  assert(loadedModalPreferences.modalVerbFilter === "moegen", "Saved modal verb should load");
+  assert(
+    loadedModalPreferences.modalFormFilter === "subjunctive2",
+    "Saved modal form should load"
+  );
+  assert(loadedModalPreferences.modalPersonFilter === "du", "Saved modal person should load");
+  localStorage.setItem(
+    UI_PREFERENCES_KEY,
+    JSON.stringify({
+      topic: "bad",
+      adjMode: "bad",
+      adjFilter: "bad",
+      verbMode: "bad",
+      modalMode: "bad",
+      modalVerbFilter: "bad",
+      modalFormFilter: "bad",
+      modalPersonFilter: "bad"
+    })
   );
   const sanitizedUiPreferences = loadUiPreferences();
   assert(sanitizedUiPreferences.topic === "adjective", "Invalid saved topic should fall back");
   assert(sanitizedUiPreferences.adjMode === "form", "Invalid adjective mode should fall back");
   assert(sanitizedUiPreferences.adjFilter === "all", "Invalid adjective filter should fall back");
   assert(sanitizedUiPreferences.verbMode === "prep", "Invalid verb mode should fall back");
+  assert(sanitizedUiPreferences.modalMode === "form", "Invalid modal mode should fall back");
+  assert(
+    sanitizedUiPreferences.modalVerbFilter === "all" &&
+      sanitizedUiPreferences.modalFormFilter === "all" &&
+      sanitizedUiPreferences.modalPersonFilter === "all",
+    "Invalid modal filters should fall back"
+  );
+
+  document
+    .querySelectorAll("[data-topic]")
+    .find((button) => button.dataset.topic === "modals")
+    .listeners.click();
+  elementMap.get("#modalVerbFilter").listeners.change({ target: { value: "duerfen" } });
+  elementMap.get("#modalFormFilter").listeners.change({ target: { value: "preterite" } });
+  elementMap.get("#modalPersonFilter").listeners.change({ target: { value: "wir" } });
+  assert(
+    appState.current.modalVerbId === "duerfen" &&
+      appState.current.modalForm === "preterite" &&
+      appState.current.modalPerson === "wir",
+    "Modal filter controls should immediately constrain the exercise"
+  );
+  const infinitiveButton = elementMap
+    .get("#controlsRow")
+    .children.find((button) => button.textContent === "Find infinitive");
+  infinitiveButton.listeners.click();
+  const savedModalUiPreferences = JSON.parse(localStorage.getItem(UI_PREFERENCES_KEY));
+  assert(savedModalUiPreferences.topic === "modals", "Modal tab clicks should save topic");
+  assert(savedModalUiPreferences.modalMode === "infinitive", "Modal mode should be saved");
+  assert(savedModalUiPreferences.modalVerbFilter === "duerfen", "Modal verb filter should be saved");
+  assert(
+    savedModalUiPreferences.modalFormFilter === "preterite",
+    "Modal form filter should be saved"
+  );
+  assert(savedModalUiPreferences.modalPersonFilter === "wir", "Modal person filter should be saved");
 
   for (const mode of ["form", "ending", "case", "article", "gender"]) {
     appState.topic = "adjective";
@@ -274,6 +441,60 @@ vm.runInContext(`${app}
       "Answer missing from verb options: " + mode
     );
   }
+
+  appState.topic = "modals";
+  appState.translationLanguage = "en";
+  appState.reviewOnly = false;
+  for (const mode of MODAL_MODES) {
+    appState.modalMode = mode;
+    for (const item of MODAL_VERBS) {
+      appState.modalVerbFilter = item.id;
+      for (const form of MODAL_FORM_DEFINITIONS) {
+        appState.modalFormFilter = form.id;
+        for (const person of MODAL_PERSON_DEFINITIONS) {
+          appState.modalPersonFilter = person.id;
+          nextExercise();
+          const exercise = appState.current;
+          const expectedAnswer =
+            mode === "form" ? item.forms[form.id][person.formIndex] : item.infinitive;
+          assert(exercise.topic === "modals", "Modal filters should build a modal exercise");
+          assert(exercise.modalVerbId === item.id, "Modal verb filter should be respected");
+          assert(exercise.modalForm === form.id, "Modal form filter should be respected");
+          assert(exercise.modalPerson === person.id, "Modal person filter should be respected");
+          assert(exercise.answer === expectedAnswer, "Incorrect generated modal answer");
+          assert(exercise.options.includes(expectedAnswer), "Modal options should include the answer");
+          assert(exercise.options.length === 4, "Modal exercises should have four choices");
+          assert(
+            new Set(exercise.options).size === exercise.options.length,
+            "Modal choices should be unique"
+          );
+          assert(
+            person.subjects.includes(exercise.modalSubject),
+            "Modal exercise should use a subject from the selected person group"
+          );
+          assert(
+            exercise.translation.meaning === MODAL_TRANSLATIONS[item.id].en.meanings[form.id],
+            "Modal exercise should use the form-aware translation"
+          );
+          if (mode === "form") {
+            assert(
+              (exercise.prompt.match(/___/g) || []).length === 1,
+              "Conjugation prompts should contain one blank"
+            );
+          } else {
+            assert(!exercise.prompt.includes("___"), "Infinitive prompts should show the finite form");
+            assert(
+              exercise.revealTranslationAfterAnswer,
+              "Infinitive drills should hide the answer-bearing translation before submission"
+            );
+          }
+        }
+      }
+    }
+  }
+  appState.modalVerbFilter = "all";
+  appState.modalFormFilter = "all";
+  appState.modalPersonFilter = "all";
 
   VERB_ITEMS.forEach((verbItem) => {
     const patternOptions = verbPatternOptions(verbItem);
@@ -314,6 +535,21 @@ vm.runInContext(`${app}
   assert(appState.answered, "Verb choices should submit immediately");
   assert(appState.progress.total === verbTotal + 1, "Verb click should count the answer");
 
+  appState.topic = "modals";
+  appState.modalMode = "form";
+  appState.modalVerbFilter = "koennen";
+  appState.modalFormFilter = "subjunctive2";
+  appState.modalPersonFilter = "du";
+  appState.reviewOnly = false;
+  nextExercise();
+  const modalTotal = appState.progress.total;
+  const modalChoice = elementMap
+    .get("#answerGrid")
+    .children.find((button) => button.textContent === appState.current.answer);
+  modalChoice.listeners.click();
+  assert(appState.answered, "Modal choices should submit immediately");
+  assert(appState.progress.total === modalTotal + 1, "Modal click should count the answer");
+
   appState.topic = "verbs";
   appState.verbMode = "prep";
   appState.translationLanguage = "ru";
@@ -332,6 +568,26 @@ vm.runInContext(`${app}
   assert(
     appState.current.translation.sentence === "Otobüsü bekliyorum.",
     "Language changes should refresh the current translation"
+  );
+
+  appState.topic = "modals";
+  appState.modalMode = "form";
+  appState.modalVerbFilter = "moegen";
+  appState.modalFormFilter = "subjunctive2";
+  appState.modalPersonFilter = "ich";
+  appState.translationLanguage = "ru";
+  appState.reviewOnly = false;
+  nextExercise();
+  assert(appState.current.answer === "möchte", "mögen Konjunktiv II should produce möchte");
+  assert(
+    appState.current.translation.meaning === "вежливое желание в настоящем: хотелось бы",
+    "Russian modal meaning should render"
+  );
+  appState.translationLanguage = "uk";
+  refreshCurrentModalTranslation();
+  assert(
+    appState.current.translation.verb === "любити; подобатися; möchten: хотіти ввічливо",
+    "Language changes should refresh modal translations"
   );
 
   appState.topic = "adjective";
@@ -373,6 +629,28 @@ vm.runInContext(`${app}
   clearTopicFavorites();
   assert(!favoritesForTopic("verbs").length, "Clearing should remove topic favourites");
 
+  appState.topic = "modals";
+  appState.modalMode = "form";
+  appState.modalVerbFilter = "muessen";
+  appState.modalFormFilter = "preterite";
+  appState.modalPersonFilter = "ihr";
+  appState.reviewOnly = false;
+  nextExercise();
+  const favoriteModal = appState.current;
+  toggleCurrentFavorite();
+  assert(favoritesForTopic("modals").length === 1, "Modal favourite should be listed");
+  setFavoriteTrainingEnabled(true);
+  assert(isFavoritesActive("modals"), "Favourite-only modal training should activate");
+  nextExercise();
+  assert(
+    appState.current.prompt === favoriteModal.prompt &&
+      appState.current.answer === favoriteModal.answer &&
+      appState.current.modalVerbId === "muessen",
+    "Favourite training should replay the saved modal drill"
+  );
+  clearTopicFavorites();
+  assert(!favoritesForTopic("modals").length, "Clearing should remove modal favourites");
+
   appState.translationLanguage = "ru";
   const verhandelnTranslations = VERB_TRANSLATIONS["verhandeln-mit-dat"];
   const savedVerhandelnRu = verhandelnTranslations.ru;
@@ -406,6 +684,23 @@ vm.runInContext(`${app}
         row.children.some((child) => child.textContent === "Translation coming soon.")
       ),
     "Translation panel should not render placeholder example rows"
+  );
+
+  const savedWollenRu = MODAL_TRANSLATIONS.wollen.ru;
+  delete MODAL_TRANSLATIONS.wollen.ru;
+  const untranslatedModalFallback = modalTranslationFor(
+    MODAL_VERB_LOOKUP.get("wollen"),
+    "subjunctive2"
+  );
+  MODAL_TRANSLATIONS.wollen.ru = savedWollenRu;
+  assert(
+    untranslatedModalFallback.language === "en" &&
+      untranslatedModalFallback.languageLabel === "English",
+    "Missing selected-language modal translations should fall back to English"
+  );
+  assert(
+    untranslatedModalFallback.meaning === "a conditional wish or intention: would want to",
+    "Modal fallback should preserve the form-aware English meaning"
   );
 
   appState.verbSearch = "kuemmern um";
@@ -622,6 +917,34 @@ vm.runInContext(`${app}
   appState.selected = appState.current.answer;
   submitAnswer();
   assert(appState.progress.misses[0].resolved, "Correct review should mark miss resolved");
+
+  appState.topic = "modals";
+  appState.modalMode = "form";
+  appState.modalVerbFilter = "duerfen";
+  appState.modalFormFilter = "subjunctive2";
+  appState.modalPersonFilter = "du";
+  appState.reviewOnly = false;
+  nextExercise();
+  const originalModal = appState.current;
+  appState.selected = originalModal.options.find((option) => option !== originalModal.answer);
+  submitAnswer();
+  const modalMiss = appState.progress.misses.find(
+    (candidate) => candidate.topic === "modals" && candidate.signature === mistakeSignature(originalModal)
+  );
+  assert(modalMiss && !modalMiss.resolved, "Incorrect modal answer should create an active miss");
+  reviewMistake(modalMiss.signature);
+  assert(appState.reviewOnly, "Modal review mode should activate from a miss");
+  assert(appState.current.prompt === originalModal.prompt, "Modal review should repeat exact prompt");
+  assert(appState.current.answer === originalModal.answer, "Modal review should repeat exact answer");
+  assert(
+    appState.current.modalVerbId === "duerfen" &&
+      appState.current.modalForm === "subjunctive2" &&
+      appState.current.modalPerson === "du",
+    "Modal review should preserve canonical dimension keys"
+  );
+  appState.selected = appState.current.answer;
+  submitAnswer();
+  assert(modalMiss.resolved, "Correct modal review should mark the miss resolved");
 })()`, context, { filename: "app.js" });
 
 const { context: reloadContext } = makeHarness({
@@ -643,5 +966,35 @@ vm.runInContext(`${app}
   assert(appState.current.topic === "verbs", "Initial exercise should use restored topic");
   assert(appState.current.title === "Case after preposition", "Initial exercise should use restored verb mode");
 })()`, reloadContext, { filename: "app-reload.js" });
+
+const { context: modalReloadContext } = makeHarness({
+  "deutsch-drill-ui-preferences-v1": JSON.stringify({
+    topic: "modals",
+    adjMode: "form",
+    adjFilter: "all",
+    verbMode: "prep",
+    modalMode: "infinitive",
+    modalVerbFilter: "moegen",
+    modalFormFilter: "subjunctive2",
+    modalPersonFilter: "du"
+  }),
+  "deutsch-drill-translation-language-v1": "ru"
+});
+
+vm.runInContext(`${app}
+
+(() => {
+  assert(appState.topic === "modals", "Startup should restore the modal topic");
+  assert(appState.modalMode === "infinitive", "Startup should restore the modal mode");
+  assert(appState.modalVerbFilter === "moegen", "Startup should restore the modal verb filter");
+  assert(
+    appState.modalFormFilter === "subjunctive2",
+    "Startup should restore the modal form filter"
+  );
+  assert(appState.modalPersonFilter === "du", "Startup should restore the modal person filter");
+  assert(appState.current.topic === "modals", "Initial exercise should use the modal topic");
+  assert(appState.current.answer === "mögen", "Infinitive mode should map möchtest back to mögen");
+  assert(appState.current.translation.language === "ru", "Startup should restore modal language");
+})()`, modalReloadContext, { filename: "app-modal-reload.js" });
 
 console.log("app tests ok");
