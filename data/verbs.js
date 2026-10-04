@@ -2,6 +2,19 @@
 
 const VERB_ITEMS = [
   {
+    id: "aufpassen-auf-akk",
+    verb: "aufpassen",
+    prep: "auf",
+    caseKey: "akk",
+    sentence: "Ich passe ___ den Hund auf.",
+    sentences: [
+      "Ich passe ___ den Hund auf.",
+      "Kannst du heute ___ meine Kinder aufpassen?",
+      "Pass bitte gut ___ deine Tasche auf."
+    ],
+    pattern: "aufpassen auf + Akkusativ"
+  },
+  {
     id: "achten-auf-akk",
     verb: "achten",
     prep: "auf",
@@ -237,6 +250,19 @@ const VERB_ITEMS = [
     pattern: "erkennen an + Dativ"
   },
   {
+    id: "schicken-an-akk",
+    verb: "schicken",
+    prep: "an",
+    caseKey: "akk",
+    sentence: "Ich schicke einen Brief ___ meine Schwester.",
+    sentences: [
+      "Ich schicke einen Brief ___ meine Schwester.",
+      "Bitte schicken Sie die Rechnung ___ unsere Firma.",
+      "Er hat das Paket ___ seinen Bruder geschickt."
+    ],
+    pattern: "schicken an + Akkusativ"
+  },
+  {
     id: "schreiben-an-akk",
     verb: "schreiben",
     prep: "an",
@@ -408,6 +434,45 @@ const VERB_ITEMS = [
     pattern: "zweifeln an + Dativ"
   },
   {
+    id: "sich-bedanken-bei-dat",
+    verb: "sich bedanken",
+    prep: "bei",
+    caseKey: "dat",
+    sentence: "Ich bedanke mich ___ meiner Lehrerin.",
+    sentences: [
+      "Ich bedanke mich ___ meiner Lehrerin.",
+      "Wir bedanken uns ___ allen Helfern.",
+      "Sie hat sich ___ ihrem Nachbarn für die Hilfe bedankt."
+    ],
+    pattern: "sich bedanken bei + Dativ"
+  },
+  {
+    id: "sich-beschweren-bei-dat",
+    verb: "sich beschweren",
+    prep: "bei",
+    caseKey: "dat",
+    sentence: "Ich beschwere mich ___ dem Vermieter.",
+    sentences: [
+      "Ich beschwere mich ___ dem Vermieter.",
+      "Der Gast hat sich ___ der Hotelleitung beschwert.",
+      "Sie beschwert sich ___ ihrem Internetanbieter über die langsame Verbindung."
+    ],
+    pattern: "sich beschweren bei + Dativ"
+  },
+  {
+    id: "sich-informieren-bei-dat",
+    verb: "sich informieren",
+    prep: "bei",
+    caseKey: "dat",
+    sentence: "Ich informiere mich ___ der Touristeninformation.",
+    sentences: [
+      "Ich informiere mich ___ der Touristeninformation.",
+      "Bitte informieren Sie sich ___ Ihrer Krankenkasse über die Kosten.",
+      "Wir haben uns ___ einem Mitarbeiter über die Öffnungszeiten informiert."
+    ],
+    pattern: "sich informieren bei + Dativ"
+  },
+  {
     id: "sich-entschuldigen-bei-dat",
     verb: "sich entschuldigen",
     prep: "bei",
@@ -445,6 +510,32 @@ const VERB_ITEMS = [
       "Sie wohnt diesen Monat ___ einer guten Freundin."
     ],
     pattern: "wohnen bei + Dativ"
+  },
+  {
+    id: "sich-bedanken-fuer-akk",
+    verb: "sich bedanken",
+    prep: "für",
+    caseKey: "akk",
+    sentence: "Ich bedanke mich ___ das Geschenk.",
+    sentences: [
+      "Ich bedanke mich ___ das Geschenk.",
+      "Wir bedanken uns herzlich ___ Ihre Unterstützung.",
+      "Sie hat sich bei mir ___ die Einladung bedankt."
+    ],
+    pattern: "sich bedanken für + Akkusativ"
+  },
+  {
+    id: "sich-engagieren-fuer-akk",
+    verb: "sich engagieren",
+    prep: "für",
+    caseKey: "akk",
+    sentence: "Sie engagiert sich ___ den Umweltschutz.",
+    sentences: [
+      "Sie engagiert sich ___ den Umweltschutz.",
+      "Viele Jugendliche engagieren sich ___ soziale Projekte.",
+      "Er engagiert sich seit Jahren ___ die Rechte von Kindern."
+    ],
+    pattern: "sich engagieren für + Akkusativ"
   },
   {
     id: "kaempfen-fuer-akk",
@@ -570,6 +661,19 @@ const VERB_ITEMS = [
       "Könnten Sie diesen Brief bitte ___ das Deutsche übersetzen?"
     ],
     pattern: "übersetzen in + Akkusativ"
+  },
+  {
+    id: "sich-unterhalten-mit-dat",
+    verb: "sich unterhalten",
+    prep: "mit",
+    caseKey: "dat",
+    sentence: "Ich unterhalte mich ___ meiner Nachbarin.",
+    sentences: [
+      "Ich unterhalte mich ___ meiner Nachbarin.",
+      "In der Pause unterhalten wir uns ___ unseren Kollegen.",
+      "Er hat sich lange ___ seinem alten Freund unterhalten."
+    ],
+    pattern: "sich unterhalten mit + Dativ"
   },
   {
     id: "anfangen-mit-dat",
@@ -1072,6 +1176,32 @@ const VERB_ITEMS = [
     pattern: "es geht um + Akkusativ"
   },
   {
+    id: "sich-aufregen-ueber-akk",
+    verb: "sich aufregen",
+    prep: "über",
+    caseKey: "akk",
+    sentence: "Er regt sich ___ den Lärm auf.",
+    sentences: [
+      "Er regt sich ___ den Lärm auf.",
+      "Reg dich nicht ___ jede Kleinigkeit auf.",
+      "Die Fahrgäste haben sich ___ die Verspätung aufgeregt."
+    ],
+    pattern: "sich aufregen über + Akkusativ"
+  },
+  {
+    id: "sich-unterhalten-ueber-akk",
+    verb: "sich unterhalten",
+    prep: "über",
+    caseKey: "akk",
+    sentence: "Wir unterhalten uns ___ unsere Reisepläne.",
+    sentences: [
+      "Wir unterhalten uns ___ unsere Reisepläne.",
+      "Sie unterhält sich mit ihrer Freundin ___ den neuen Film.",
+      "Beim Abendessen haben wir uns ___ das Wochenende unterhalten."
+    ],
+    pattern: "sich unterhalten über + Akkusativ"
+  },
+  {
     id: "berichten-ueber-akk",
     verb: "berichten",
     prep: "über",
@@ -1232,6 +1362,19 @@ const VERB_ITEMS = [
       "Der frische Fisch kommt direkt ___ dem Norden."
     ],
     pattern: "kommen aus + Dativ"
+  },
+  {
+    id: "sprechen-von-dat",
+    verb: "sprechen",
+    prep: "von",
+    caseKey: "dat",
+    sentence: "Sie spricht ___ ihrer Kindheit.",
+    sentences: [
+      "Sie spricht ___ ihrer Kindheit.",
+      "Er spricht oft ___ seinem Traum vom eigenen Haus.",
+      "Die Kinder sprechen schon ___ den nächsten Ferien."
+    ],
+    pattern: "sprechen von + Dativ"
   },
   {
     id: "abhaengen-von-dat",

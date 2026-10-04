@@ -1,6 +1,248 @@
 "use strict";
 
 const VERB_TRANSLATIONS = {
+  "aufpassen-auf-akk": {
+    en: {
+      verb: "to look after",
+      meaning: "to look after / watch out for",
+      sentence: "I am looking after the dog."
+    },
+    ru: {
+      verb: "присматривать",
+      meaning: "присматривать за / следить за",
+      sentence: "Я присматриваю за собакой."
+    },
+    uk: {
+      verb: "наглядати",
+      meaning: "наглядати за / пильнувати",
+      sentence: "Я наглядаю за собакою."
+    },
+    tr: {
+      verb: "göz kulak olmak",
+      meaning: "birine veya bir şeye göz kulak olmak",
+      sentence: "Köpeğe göz kulak oluyorum."
+    }
+  },
+  "schicken-an-akk": {
+    en: {
+      verb: "to send",
+      meaning: "to send something to someone",
+      sentence: "I am sending a letter to my sister."
+    },
+    ru: {
+      verb: "отправлять",
+      meaning: "отправлять что-либо кому-либо",
+      sentence: "Я отправляю письмо своей сестре."
+    },
+    uk: {
+      verb: "надсилати",
+      meaning: "надсилати щось комусь",
+      sentence: "Я надсилаю листа своїй сестрі."
+    },
+    tr: {
+      verb: "göndermek",
+      meaning: "birine bir şey göndermek",
+      sentence: "Kız kardeşime bir mektup gönderiyorum."
+    }
+  },
+  "sich-bedanken-bei-dat": {
+    en: {
+      verb: "to thank",
+      meaning: "to express thanks to someone",
+      sentence: "I thank my teacher."
+    },
+    ru: {
+      verb: "благодарить",
+      meaning: "благодарить кого-либо",
+      sentence: "Я благодарю свою учительницу."
+    },
+    uk: {
+      verb: "дякувати",
+      meaning: "дякувати комусь",
+      sentence: "Я дякую своїй учительці."
+    },
+    tr: {
+      verb: "teşekkür etmek",
+      meaning: "birine teşekkür etmek",
+      sentence: "Öğretmenime teşekkür ediyorum."
+    }
+  },
+  "sich-beschweren-bei-dat": {
+    en: {
+      verb: "to complain",
+      meaning: "to complain to someone",
+      sentence: "I complain to the landlord."
+    },
+    ru: {
+      verb: "жаловаться",
+      meaning: "жаловаться кому-либо",
+      sentence: "Я жалуюсь арендодателю."
+    },
+    uk: {
+      verb: "скаржитися",
+      meaning: "скаржитися комусь",
+      sentence: "Я скаржуся орендодавцю."
+    },
+    tr: {
+      verb: "şikâyet etmek",
+      meaning: "birine şikâyette bulunmak",
+      sentence: "Ev sahibine şikâyette bulunuyorum."
+    }
+  },
+  "sich-informieren-bei-dat": {
+    en: {
+      verb: "to get information",
+      meaning: "to get information from someone or an organization",
+      sentence: "I get information from the tourist information office."
+    },
+    ru: {
+      verb: "узнавать",
+      meaning: "узнавать информацию у кого-либо или в организации",
+      sentence: "Я узнаю информацию в туристическом информационном бюро."
+    },
+    uk: {
+      verb: "дізнаватися",
+      meaning: "дізнаватися інформацію в когось або в організації",
+      sentence: "Я дізнаюся інформацію в туристичному інформаційному бюро."
+    },
+    tr: {
+      verb: "bilgi almak",
+      meaning: "birinden veya bir kurumdan bilgi almak",
+      sentence: "Turizm danışma bürosundan bilgi alıyorum."
+    }
+  },
+  "sich-bedanken-fuer-akk": {
+    en: {
+      verb: "to thank",
+      meaning: "to express thanks for something",
+      sentence: "I express my thanks for the gift."
+    },
+    ru: {
+      verb: "благодарить",
+      meaning: "благодарить за что-либо",
+      sentence: "Я благодарю за подарок."
+    },
+    uk: {
+      verb: "дякувати",
+      meaning: "дякувати за щось",
+      sentence: "Я дякую за подарунок."
+    },
+    tr: {
+      verb: "teşekkür etmek",
+      meaning: "bir şey için teşekkür etmek",
+      sentence: "Hediye için teşekkür ediyorum."
+    }
+  },
+  "sich-engagieren-fuer-akk": {
+    en: {
+      verb: "to get involved",
+      meaning: "to actively support / be committed to",
+      sentence: "She is actively involved in environmental protection."
+    },
+    ru: {
+      verb: "активно поддерживать",
+      meaning: "активно выступать за / работать на благо",
+      sentence: "Она активно занимается защитой окружающей среды."
+    },
+    uk: {
+      verb: "активно підтримувати",
+      meaning: "активно виступати за / працювати на благо",
+      sentence: "Вона активно займається захистом довкілля."
+    },
+    tr: {
+      verb: "aktif çaba göstermek",
+      meaning: "bir amaç için aktif çaba göstermek",
+      sentence: "Çevreyi korumak için aktif çaba gösteriyor."
+    }
+  },
+  "sich-unterhalten-mit-dat": {
+    en: {
+      verb: "to chat",
+      meaning: "to talk / chat with someone",
+      sentence: "I am chatting with my neighbor."
+    },
+    ru: {
+      verb: "беседовать",
+      meaning: "беседовать с кем-либо",
+      sentence: "Я беседую со своей соседкой."
+    },
+    uk: {
+      verb: "розмовляти",
+      meaning: "розмовляти з кимось",
+      sentence: "Я розмовляю зі своєю сусідкою."
+    },
+    tr: {
+      verb: "sohbet etmek",
+      meaning: "biriyle sohbet etmek",
+      sentence: "Komşumla sohbet ediyorum."
+    }
+  },
+  "sich-aufregen-ueber-akk": {
+    en: {
+      verb: "to get upset",
+      meaning: "to get upset about",
+      sentence: "He gets upset about the noise."
+    },
+    ru: {
+      verb: "возмущаться",
+      meaning: "возмущаться чем-либо / нервничать из-за чего-либо",
+      sentence: "Он возмущается шумом."
+    },
+    uk: {
+      verb: "обурюватися",
+      meaning: "обурюватися чимось / нервувати через щось",
+      sentence: "Він обурюється шумом."
+    },
+    tr: {
+      verb: "sinirlenmek",
+      meaning: "bir şeye sinirlenmek",
+      sentence: "Gürültüye sinirleniyor."
+    }
+  },
+  "sich-unterhalten-ueber-akk": {
+    en: {
+      verb: "to chat",
+      meaning: "to talk / chat about something",
+      sentence: "We are chatting about our travel plans."
+    },
+    ru: {
+      verb: "беседовать",
+      meaning: "беседовать о чём-либо",
+      sentence: "Мы беседуем о наших планах на путешествие."
+    },
+    uk: {
+      verb: "розмовляти",
+      meaning: "розмовляти про щось",
+      sentence: "Ми розмовляємо про наші плани на подорож."
+    },
+    tr: {
+      verb: "sohbet etmek",
+      meaning: "bir şey hakkında sohbet etmek",
+      sentence: "Seyahat planlarımız hakkında sohbet ediyoruz."
+    }
+  },
+  "sprechen-von-dat": {
+    en: {
+      verb: "to speak",
+      meaning: "to speak of / mention",
+      sentence: "She speaks of her childhood."
+    },
+    ru: {
+      verb: "говорить",
+      meaning: "говорить о / упоминать",
+      sentence: "Она говорит о своём детстве."
+    },
+    uk: {
+      verb: "говорити",
+      meaning: "говорити про / згадувати",
+      sentence: "Вона говорить про своє дитинство."
+    },
+    tr: {
+      verb: "bahsetmek",
+      meaning: "birinden veya bir şeyden bahsetmek",
+      sentence: "Çocukluğundan bahsediyor."
+    }
+  },
   "achten-auf-akk": {
     en: {
       verb: "to pay attention",
