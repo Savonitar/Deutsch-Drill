@@ -10,7 +10,7 @@ const VERB_SENTENCE_COOLDOWN = 8;
 const TOPICS = ["adjective", "verbs", "modals"];
 const ADJECTIVE_MODES = ["form", "ending", "case", "article", "gender"];
 const ADJECTIVE_FILTERS = ["all", "definite", "mixed", "strong"];
-const VERB_MODES = ["prep", "case", "pattern"];
+const VERB_MODES = ["learn", "prep", "case", "pattern"];
 const MODAL_MODES = ["form", "infinitive"];
 const DEFAULT_UI_PREFERENCES = {
   topic: "adjective",
@@ -440,12 +440,16 @@ const elements = {
   modalPersonFilter: document.querySelector("#modalPersonFilter"),
   metaGrid: document.querySelector("#metaGrid"),
   promptText: document.querySelector("#promptText"),
+  exampleTranslation: document.querySelector("#exampleTranslation"),
+  learningIntro: document.querySelector("#learningIntro"),
+  learningPattern: document.querySelector("#learningPattern"),
   answerGrid: document.querySelector("#answerGrid"),
   translationPanel: document.querySelector("#translationPanel"),
   feedbackBox: document.querySelector("#feedbackBox"),
   resetButton: document.querySelector("#resetButton"),
   submitButton: document.querySelector("#submitButton"),
   nextButton: document.querySelector("#nextButton"),
+  previousButton: document.querySelector("#previousButton"),
   topicAccuracyLabel: document.querySelector("#topicAccuracyLabel"),
   topicMeter: document.querySelector("#topicMeter"),
   topicCorrect: document.querySelector("#topicCorrect"),
@@ -1312,7 +1316,7 @@ function isCurrentFavorite() {
 }
 
 function toggleCurrentFavorite() {
-  if (!appState.current) {
+  if (!appState.current || appState.current.isLearning) {
     return;
   }
   const index = currentFavoriteIndex();
@@ -1589,7 +1593,41 @@ function buildAdjectiveExercise() {
   };
 }
 
+function buildVerbLearningCard(direction = 1) {
+  const items = activeVerbItems();
+  const scope = items.map((item) => item.id).join(",");
+  const current = appState.current;
+  const index = current?.isLearning && current.learningScope === scope
+    ? (current.learningIndex + direction + items.length) % items.length
+    : 0;
+  const item = items[index];
+  // The authored translation belongs to the main example, not its drill variants.
+  const translation = verbTranslationFor(item, item.sentence);
+  return {
+    topic: "verbs",
+    isLearning: true,
+    learningIndex: index,
+    learningCount: items.length,
+    learningScope: scope,
+    verbItemId: item.id,
+    verbSentence: item.sentence,
+    id: `verb-learn:${item.id}`,
+    title: "Learn verb patterns",
+    prompt: completedVerbSentence(item),
+    options: [],
+    meta: [
+      ["Card", `${index + 1} of ${items.length}`],
+      ["Case", CASES[item.caseKey]]
+    ],
+    translation,
+    explanation: item.pattern
+  };
+}
+
 function buildVerbExercise() {
+  if (appState.verbMode === "learn") {
+    return buildVerbLearningCard();
+  }
   const { item, sentence } = pickVerbExerciseSource(activeVerbItems());
   const mode = appState.verbMode;
   const completedSentence = sentence.replace("___", item.prep);
@@ -1849,7 +1887,7 @@ function renderTopicChrome() {
   } else if (appState.topic === "verbs") {
     const selectedCount = selectedVerbIds().length;
     elements.topicKicker.textContent = "Preposition plus case";
-    elements.topicTitle.textContent = "Verb pattern";
+    elements.topicTitle.textContent = appState.current?.isLearning ? "Learn verb patterns" : "Verb pattern";
     elements.dataBadge.textContent = isVerbListActive()
       ? `${selectedCount} selected of ${VERB_ITEMS.length} patterns`
       : `${VERB_ITEMS.length} authored patterns`;
@@ -1878,6 +1916,7 @@ function renderControls() {
     ];
   } else if (appState.topic === "verbs") {
     controls = [
+      ["mode", "learn", "Learn"],
       ["mode", "prep", "Preposition"],
       ["mode", "case", "Case"],
       ["mode", "pattern", "Pattern"],
@@ -1903,7 +1942,8 @@ function renderControls() {
         (kind === "mode" && appState.adjMode === value) ||
         (kind === "filter" && appState.adjFilter === value);
     } else if (appState.topic === "verbs") {
-      active ||= kind === "mode" && appState.verbMode === value;
+      active ||= kind === "mode" && appState.verbMode === value &&
+        (value !== "learn" || Boolean(appState.current?.isLearning));
     } else {
       active ||= kind === "mode" && appState.modalMode === value;
     }
@@ -1967,6 +2007,13 @@ function renderTranslationSettings() {
 
 function renderQuestion() {
   const exercise = appState.current;
+  const isLearning = Boolean(exercise.isLearning);
+  elements.learningIntro.classList.toggle("hidden", !isLearning);
+  elements.learningPattern.classList.toggle("hidden", !isLearning);
+  elements.learningPattern.textContent = isLearning ? exercise.explanation : "";
+  elements.metaGrid.classList.toggle("learning-meta", isLearning);
+  elements.answerGrid.classList.toggle("hidden", isLearning);
+  elements.favoriteButton.classList.toggle("hidden", isLearning);
   const favorited = isCurrentFavorite();
   elements.favoriteButton.textContent = favorited ? "★" : "☆";
   elements.favoriteButton.classList.toggle("active", favorited);
@@ -2024,6 +2071,12 @@ function renderQuestion() {
 function renderTranslationPanel(exercise) {
   elements.translationPanel.replaceChildren();
   const shouldReveal = !exercise.revealTranslationAfterAnswer || appState.answered;
+  const exampleTranslation = exercise.isLearning && shouldReveal
+    ? exercise.translation?.sentence || ""
+    : "";
+  elements.exampleTranslation.textContent = exampleTranslation;
+  elements.exampleTranslation.classList.toggle("hidden", !exampleTranslation);
+  elements.exampleTranslation.setAttribute("lang", exercise.translation?.language || "en");
   elements.translationPanel.classList.toggle("hidden", !exercise.translation || !shouldReveal);
   if (!exercise.translation || !shouldReveal) {
     return;
@@ -2036,7 +2089,7 @@ function renderTranslationPanel(exercise) {
     ["Verb", `${source} = ${exercise.translation.verb}`],
     ["Meaning", exercise.translation.meaning]
   ];
-  if (exercise.translation.sentence) {
+  if (exercise.translation.sentence && !exercise.isLearning) {
     rows.push(["Example", exercise.translation.sentence]);
   }
   if (exercise.translation.note) {
@@ -2056,10 +2109,16 @@ function renderTranslationPanel(exercise) {
 }
 
 function renderQuestionActions() {
+  const isLearning = Boolean(appState.current?.isLearning);
   const isImmediateTopic = appState.topic === "verbs" || appState.topic === "modals";
   elements.submitButton.classList.toggle("hidden", isImmediateTopic || appState.answered);
   elements.resetButton.classList.toggle("hidden", isImmediateTopic);
-  elements.nextButton.classList.toggle("hidden", !appState.answered);
+  elements.nextButton.classList.toggle("hidden", !appState.answered && !isLearning);
+  elements.previousButton.classList.toggle("hidden", !isLearning);
+  elements.previousButton.disabled = !isLearning || appState.current.learningIndex === 0;
+  elements.nextButton.textContent = isLearning
+    ? (appState.current.learningIndex === appState.current.learningCount - 1 ? "Start again" : "Next card")
+    : "Next";
   elements.submitButton.disabled = isImmediateTopic;
   elements.resetButton.disabled = isImmediateTopic;
   elements.nextButton.disabled = false;
@@ -2237,6 +2296,9 @@ function renderFavoriteList() {
 }
 
 function submitAnswer() {
+  if (appState.current?.isLearning) {
+    return;
+  }
   if (!appState.selected || appState.answered) {
     elements.feedbackBox.textContent = "Choose an answer first.";
     elements.feedbackBox.className = "feedback bad";
@@ -2307,6 +2369,13 @@ elements.topicButtons.forEach((button) => {
 
 elements.submitButton.addEventListener("click", submitAnswer);
 elements.nextButton.addEventListener("click", nextExercise);
+elements.previousButton.addEventListener("click", () => {
+  if (!appState.current?.isLearning || appState.current.learningIndex === 0) {
+    return;
+  }
+  appState.current = buildVerbLearningCard(-1);
+  render();
+});
 elements.resetButton.addEventListener("click", resetProgress);
 elements.favoriteButton.addEventListener("click", toggleCurrentFavorite);
 elements.verbSearchInput.addEventListener("input", (event) => {

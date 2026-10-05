@@ -997,4 +997,93 @@ vm.runInContext(`${app}
   assert(appState.current.translation.language === "ru", "Startup should restore modal language");
 })()`, modalReloadContext, { filename: "app-modal-reload.js" });
 
+const { context: learningContext } = makeHarness({
+  "deutsch-drill-ui-preferences-v1": JSON.stringify({ topic: "verbs", verbMode: "learn" }),
+  "deutsch-drill-training-list-v1": JSON.stringify({
+    verbs: ["sich-bedanken-bei-dat", "sich-bedanken-fuer-akk"],
+    useVerbList: true
+  }),
+  "deutsch-drill-translation-language-v1": "ru"
+});
+
+vm.runInContext(`${app}
+
+(() => {
+  const firstId = "sich-bedanken-bei-dat";
+  const secondId = "sich-bedanken-fuer-akk";
+  const firstItem = VERB_LOOKUP.get(firstId);
+  const hidden = (selector) => elementMap.get(selector).classList.values.has("hidden");
+  const clickMode = (label) => elementMap.get("#controlsRow").children
+    .find((button) => button.textContent === label).listeners.click();
+  assert(appState.verbMode === "learn" && appState.current.isLearning, "Reload should restore Learn mode");
+  assert(appState.current.verbItemId === firstId, "Learning should start with the selected list");
+  assert(appState.current.learningCount === 2, "Learning should count selected patterns");
+  assert(appState.current.prompt === completedVerbSentence(firstItem), "Learning should show the complete main example");
+  assert(elementMap.get("#learningPattern").textContent === firstItem.pattern, "Learning should reveal the full pattern and case");
+  assert(!hidden("#learningIntro") && !hidden("#translationPanel"), "Learning guidance and translation should appear immediately");
+  assert(hidden("#answerGrid") && hidden("#submitButton"), "Learning should not ask for an answer");
+  assert(!hidden("#nextButton") && !hidden("#previousButton"), "Learning navigation should appear immediately");
+  assert(elementMap.get("#previousButton").disabled, "Previous should be disabled at the first card");
+  const progressBefore = JSON.stringify(appState.progress);
+  const favoritesBefore = JSON.stringify(appState.favorites);
+  const firstPrompt = appState.current.prompt;
+  for (const language of Object.keys(TRANSLATION_LANGUAGES)) {
+    elementMap.get("#translationLanguage").listeners.change({ target: { value: language } });
+    assert(appState.current.prompt === firstPrompt, "Language changes should keep the current card");
+    assert(appState.current.translation.sentence === VERB_TRANSLATIONS[firstId][language].sentence,
+      "Learning translation should match the main example in " + language);
+    assert(!hidden("#exampleTranslation") &&
+      elementMap.get("#exampleTranslation").textContent === VERB_TRANSLATIONS[firstId][language].sentence,
+      "The translated example should appear under the German example in " + language);
+    assert(!elementMap.get("#translationPanel").children.some((row) => row.children[0].textContent === "Example"),
+      "Learning should not repeat the translated example in the details panel");
+  }
+  elementMap.get("#nextButton").listeners.click();
+  assert(appState.current.verbItemId === secondId, "Next should visit the next selected pattern without guessing");
+  assert(elementMap.get("#nextButton").textContent === "Start again", "Last card should offer a restart");
+  assert(!elementMap.get("#previousButton").disabled, "Previous should be available after advancing");
+  elementMap.get("#previousButton").listeners.click();
+  assert(appState.current.verbItemId === firstId, "Previous should return to the same example");
+  nextExercise();
+  nextExercise();
+  assert(appState.current.verbItemId === firstId, "Restart should return to the first card");
+  appState.selected = "bei";
+  submitAnswer();
+  toggleCurrentFavorite();
+  assert(JSON.stringify(appState.progress) === progressBefore, "Learning must not change scores, streaks, mastery, or mistakes");
+  assert(JSON.stringify(appState.favorites) === favoritesBefore, "Learning cards must not be stored as scored favourite drills");
+  clickMode("Preposition");
+  assert(!appState.current.isLearning && !hidden("#answerGrid"), "Practice mode should restore answer choices");
+  assert(hidden("#learningPattern") && hidden("#previousButton"), "Practice mode should hide learning controls");
+  assert(hidden("#exampleTranslation"), "Practice mode should hide the learning example translation");
+  const practice = appState.current;
+  appState.selected = practice.options.find((option) => option !== practice.answer);
+  submitAnswer();
+  clickMode("Learn");
+  assert(appState.current.isLearning && !appState.reviewOnly, "Learn should exit practice and review");
+  assert(loadUiPreferences().verbMode === "learn", "The Learn choice should be saved");
+  clickMode("Mistakes");
+  assert(appState.reviewOnly && !appState.current.isLearning && !hidden("#answerGrid"),
+    "Mistake review should remain an answerable drill after learning");
+  clickMode("Learn");
+  toggleVerbInTrainingList(firstId);
+  assert(appState.current.verbItemId === secondId && appState.current.learningCount === 1,
+    "Changing the selected list should refresh learning scope");
+  nextExercise();
+  assert(appState.current.verbItemId === secondId, "A single-card list should stay in scope");
+  clearVerbTrainingList();
+  assert(appState.current.learningCount === VERB_ITEMS.length, "An empty list should fall back to the full catalog");
+  const seen = new Set();
+  for (let index = 0; index < VERB_ITEMS.length; index += 1) {
+    const card = appState.current;
+    const item = VERB_LOOKUP.get(card.verbItemId);
+    assert(!seen.has(item.id), "Learning should cover every pattern before repeating");
+    seen.add(item.id);
+    assert(card.prompt === completedVerbSentence(item), "Every learning example should match its translation source");
+    assert(card.translation.sentence === VERB_TRANSLATIONS[item.id][appState.translationLanguage].sentence,
+      "Every learning card should have the matching translated example");
+    nextExercise();
+  }
+})()`, learningContext, { filename: "app-learning.js" });
+
 console.log("app tests ok");

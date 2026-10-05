@@ -26,6 +26,7 @@ Progress is stored locally in the browser with `localStorage`.
 - Adjective article-pattern recognition
 - Adjective gender/number recognition
 - Verb missing-preposition questions
+- Verb learning cards with the full pattern, case, example, and translation; Previous/Next navigation follows the active verb list without scoring
 - Verb preposition-case questions
 - Full verb-pattern recognition, such as `warten auf + Akkusativ`
 - Custom verb training lists with search, bulk paste, and selected-only practice

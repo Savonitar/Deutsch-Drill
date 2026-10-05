@@ -151,8 +151,11 @@
           </section>
 
           <article class="question-box" aria-live="polite">
+            <p class="learning-intro hidden" id="learningIntro">Learn the verb, its preposition, and the case together. Read the example and translation, then move at your own pace. No answers or scoring.</p>
             <div class="meta-grid" id="metaGrid"></div>
+            <h3 class="learning-pattern hidden" id="learningPattern"></h3>
             <p class="prompt" id="promptText"></p>
+            <p class="example-translation hidden" id="exampleTranslation"></p>
             <div class="answer-grid" id="answerGrid"></div>
             <div class="translation-panel hidden" id="translationPanel"></div>
           </article>
@@ -162,6 +165,7 @@
             <div class="actions">
               <button class="ghost-button" type="button" id="resetButton">Reset</button>
               <button class="primary-button" type="button" id="submitButton">Check</button>
+              <button class="ghost-button hidden" type="button" id="previousButton">Previous</button>
               <button class="primary-button hidden" type="button" id="nextButton">Next</button>
             </div>
           </div>
